@@ -1,3 +1,4 @@
+import 'package:first_task_nts/features/time_off/presentation/screen/time_off_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,11 +42,7 @@ class AppShell extends StatelessWidget {
           index: destination.index,
           children: const [
             HomeScreen(),
-            PlaceholderScreen(
-              title: 'Time Off',
-              icon: Icons.event_note_outlined,
-              message: 'Time off requests will live here.',
-            ),
+           TimeOffScreen(),
             PlaceholderScreen(
               title: 'Payroll',
               icon: Icons.account_balance_wallet_outlined,

@@ -24,6 +24,7 @@ import 'package:first_task_nts/features/home/data/repositories/home_repository_i
 import 'package:first_task_nts/features/home/domain/usecases/check_in.dart';
 import 'package:first_task_nts/features/home/domain/usecases/get_today_session.dart';
 import 'package:first_task_nts/features/home/presentation/cubit/home_cubit.dart';
+import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 
 AttendanceCubit buildAttendanceCubit() => AttendanceCubit(
       getAttendanceLogs: GetAttendanceLogs(
@@ -52,11 +53,13 @@ NtsApp buildApp({
   AttendanceCubit? attendanceCubit,
   ExpensesCubit? expensesCubit,
   HomeCubit? homeCubit,
+  ProfileCubit? profileCubit,
 }) {
   return NtsApp(
     attendanceCubit: attendanceCubit ?? buildAttendanceCubit(),
     expensesCubit: expensesCubit ?? buildExpensesCubit(),
     homeCubit: homeCubit ?? buildHomeCubit(),
+    profileCubit: profileCubit ?? ProfileCubit(),
   );
 }
 

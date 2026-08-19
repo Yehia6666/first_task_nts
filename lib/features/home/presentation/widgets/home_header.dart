@@ -1,3 +1,4 @@
+import 'package:first_task_nts/features/profile/presentation/screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -82,7 +83,12 @@ class _AvatarButton extends StatelessWidget {
       color: Colors.transparent,
       shape: const CircleBorder(),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(builder: (_) => const ProfileScreen()),
+          );
+        },
         customBorder: const CircleBorder(),
         child: Container(
           width: 32,

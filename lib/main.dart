@@ -20,6 +20,7 @@ import 'features/home/domain/repository/home_repository.dart';
 import 'features/home/domain/usecases/check_in.dart';
 import 'features/home/domain/usecases/get_today_session.dart';
 import 'features/home/presentation/cubit/home_cubit.dart';
+import 'features/profile/presentation/cubit/profile_cubit.dart';
 
 void main() {
   final AttendanceRepository attendanceRepository = AttendanceRepositoryImpl(
@@ -48,11 +49,14 @@ void main() {
     checkIn: CheckIn(homeRepository),
   );
 
+  final profileCubit = ProfileCubit();
+
   runApp(
     NtsApp(
       attendanceCubit: attendanceCubit,
       expensesCubit: expensesCubit,
       homeCubit: homeCubit,
+      profileCubit: profileCubit,
     ),
   );
 }
