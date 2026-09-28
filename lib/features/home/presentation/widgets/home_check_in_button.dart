@@ -6,9 +6,6 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
-/// Large full-width green check-in button with a circular icon container and
-/// a soft green glow. Shows a spinner while checking in and a done state once
-/// checked in.
 class HomeCheckInButton extends StatelessWidget {
   const HomeCheckInButton({
     super.key,

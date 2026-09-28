@@ -11,9 +11,6 @@ import 'home_check_in_button.dart';
 import 'home_illustration.dart';
 import 'home_time_summary.dart';
 
-/// The large hero card on Home: mascot, greeting, live clock, time summary,
-/// progress bar and the check-in button. Everything is driven by state passed
-/// in from the Cubit.
 class HomeCheckInCard extends StatelessWidget {
   const HomeCheckInCard({
     super.key,
@@ -65,8 +62,6 @@ class HomeCheckInCard extends StatelessWidget {
   }
 }
 
-/// Pill-shaped progress bar: dark navy fill on a light gray track, rounded
-/// ends on both the track and the fill.
 class _ProgressBar extends StatelessWidget {
   const _ProgressBar({required this.progress});
 

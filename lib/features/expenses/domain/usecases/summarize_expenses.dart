@@ -1,7 +1,6 @@
 import '../entities/expense.dart';
 import '../entities/expense_summary.dart';
 
-/// Application logic for computing summary totals from a list of expenses.
 class SummarizeExpenses {
   const SummarizeExpenses();
 

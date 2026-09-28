@@ -6,8 +6,6 @@ import '../theme/app_text_styles.dart';
 
 enum AppButtonVariant { primary, secondary, text }
 
-/// Reusable button following the design system. Height 48 for full-size
-/// actions, 36 for compact ones.
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -15,69 +13,130 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.variant = AppButtonVariant.primary,
     this.icon,
+    this.trailingIcon,
+    this.loading = false,
+    this.enabled = true,
     this.expanded = true,
     this.height = 48,
+    this.backgroundColor,
+    this.pressedBackgroundColor,
+    this.foregroundColor,
+    this.borderRadius = AppRadius.md,
+    this.labelStyle,
+    this.loadingIndicatorSize = 20,
+    this.loadingColor,
   });
 
   final String label;
   final VoidCallback onPressed;
   final AppButtonVariant variant;
   final IconData? icon;
+
+  final IconData? trailingIcon;
+
+  final bool loading;
+
+  final bool enabled;
   final bool expanded;
   final double height;
 
+  final Color? backgroundColor;
+  final Color? pressedBackgroundColor;
+
+  final Color? foregroundColor;
+
+  final double borderRadius;
+  final TextStyle? labelStyle;
+  final double loadingIndicatorSize;
+  final Color? loadingColor;
+
   @override
   Widget build(BuildContext context) {
-    final content = Row(
-      mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (icon != null) ...[
-          Icon(icon, size: 20, color: _foreground),
-          const SizedBox(width: 8),
-        ],
-        Flexible(
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.labelLarge.copyWith(color: _foreground),
-          ),
-        ),
-      ],
-    );
+    final bool isActive = enabled && !loading;
+    final TextStyle textStyle = labelStyle ?? AppTextStyles.labelLarge;
+
+    final content = loading
+        ? SizedBox(
+            width: loadingIndicatorSize,
+            height: loadingIndicatorSize,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: loadingColor ?? _foreground(isActive: isActive),
+            ),
+          )
+        : Row(
+            mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 20, color: _foreground(isActive: isActive)),
+                const SizedBox(width: 8),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle.copyWith(
+                    color: _foreground(isActive: isActive),
+                  ),
+                ),
+              ),
+              if (trailingIcon != null) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  trailingIcon,
+                  size: 20,
+                  color: _foreground(isActive: isActive),
+                ),
+              ],
+            ],
+          );
+
+    final VoidCallback handler = isActive ? onPressed : () {};
 
     return SizedBox(
       height: height,
       child: switch (variant) {
         AppButtonVariant.primary => FilledButton(
-            onPressed: onPressed,
+            onPressed: handler,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
+              foregroundColor: foregroundColor ?? AppColors.onPrimary,
               disabledBackgroundColor: AppColors.surfaceVariant,
+              disabledForegroundColor: AppColors.textMuted,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderRadius: BorderRadius.circular(borderRadius),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
+            ).copyWith(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  return AppColors.surfaceVariant;
+                }
+                if (states.contains(WidgetState.pressed)) {
+                  return pressedBackgroundColor ?? AppColors.primaryDark;
+                }
+                return backgroundColor ?? AppColors.primary;
+              }),
             ),
             child: content,
           ),
         AppButtonVariant.secondary => OutlinedButton(
-            onPressed: onPressed,
+            onPressed: handler,
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textPrimary,
+              foregroundColor: foregroundColor ?? AppColors.textPrimary,
               side: const BorderSide(color: AppColors.border),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderRadius: BorderRadius.circular(borderRadius),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
             ),
             child: content,
           ),
         AppButtonVariant.text => TextButton(
-            onPressed: onPressed,
+            onPressed: handler,
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
+              foregroundColor: foregroundColor ?? AppColors.primary,
+              disabledForegroundColor: AppColors.textMuted,
               padding: const EdgeInsets.symmetric(horizontal: 12),
             ),
             child: content,
@@ -86,9 +145,13 @@ class AppButton extends StatelessWidget {
     );
   }
 
-  Color get _foreground => switch (variant) {
-        AppButtonVariant.primary => AppColors.onPrimary,
-        AppButtonVariant.secondary => AppColors.textPrimary,
-        AppButtonVariant.text => AppColors.primary,
-      };
+  Color _foreground({required bool isActive}) {
+    if (!isActive) return AppColors.textMuted;
+    return foregroundColor ??
+        switch (variant) {
+          AppButtonVariant.primary => AppColors.onPrimary,
+          AppButtonVariant.secondary => AppColors.textPrimary,
+          AppButtonVariant.text => AppColors.primary,
+        };
+  }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Construction-worker mascot illustration. Rendered from the bundled SVG
-/// asset so the Home card needs no custom drawing code.
 class HomeIllustration extends StatelessWidget {
   const HomeIllustration({super.key, this.height = 176});
 

@@ -1,9 +1,6 @@
 import '../../domain/entities/attendance_log.dart';
 import '../models/attendance_log_model.dart';
 
-/// Static/mock data source. Simulates a small network delay and returns
-/// realistic records so the app can be developed before any API exists.
-/// Replaced later by a remote source without touching domain/presentation.
 class AttendanceLocalDataSource {
   static const String _location = 'مبنى رقم 9، شارع الأمير تركي بن عبدالعزيز، الرياض';
 

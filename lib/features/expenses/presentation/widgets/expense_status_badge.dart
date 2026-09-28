@@ -4,7 +4,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../domain/entities/expense.dart';
 
-/// Maps an expense status to its design-system color pair.
 class ExpenseStatusBadge extends StatelessWidget {
   const ExpenseStatusBadge({super.key, required this.status});
 

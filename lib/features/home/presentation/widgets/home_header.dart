@@ -6,8 +6,6 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/app_responsive.dart';
 import '../../../../core/widgets/app_logo.dart';
 
-/// Home header: hamburger menu (opens the drawer), app logo, notification
-/// bell and a double-ring avatar button. Minimal and borderless.
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key, required this.onMenuTap});
 
@@ -42,7 +40,6 @@ class HomeHeader extends StatelessWidget {
   }
 }
 
-/// Notification bell with a small error-red status dot.
 class _NotificationBell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -75,7 +72,6 @@ class _NotificationBell extends StatelessWidget {
   }
 }
 
-/// Circular profile button with a gray double-ring style.
 class _AvatarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

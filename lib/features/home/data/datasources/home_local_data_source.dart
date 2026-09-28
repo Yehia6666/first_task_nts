@@ -1,9 +1,6 @@
 import '../../domain/entities/attendance_session.dart';
 import '../models/attendance_session_model.dart';
 
-/// Static/mock data source for the Home screen. Simulates a small network
-/// delay and holds today's session in memory. Replaced later by a remote
-/// source without touching domain/presentation.
 class HomeLocalDataSource {
   static const String _location = 'مبنى رقم 9، شارع الأمير تركي بن عبدالعزيز، الرياض';
 

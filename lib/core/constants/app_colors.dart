@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Central color palette — the single source of truth for every color used
-/// in the app. Never hard-code hex values inside widgets.
 abstract final class AppColors {
   static const Color background = Color(0xFFF4F5FA);
   static const Color surface = Color(0xFFFFFFFF);
@@ -16,6 +14,10 @@ abstract final class AppColors {
   static const Color primaryDark = Color(0xFF4338CA);
   static const Color primaryContainer = Color(0xFFE9E9FC);
   static const Color onPrimary = Color(0xFFFFFFFF);
+
+  static const Color teal = Color(0xFF0F766E);
+  static const Color tealDark = Color(0xFF0B5A54);
+  static const Color tealContainer = Color(0xFFE3F3F1);
 
   static const Color success = Color(0xFF22C55E);
   static const Color successContainer = Color(0xFFE8F8EE);

@@ -1,7 +1,5 @@
 import '../../domain/entities/expense.dart';
 
-/// Data-layer model. Adds JSON (de)serialization so the static source can be
-/// swapped for an API later without touching domain or presentation.
 class ExpenseModel extends Expense {
   const ExpenseModel({
     required super.id,

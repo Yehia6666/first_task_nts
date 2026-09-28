@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:first_task_nts/app.dart';
+import 'package:first_task_nts/app/masary_app.dart';
+import 'package:first_task_nts/app_shell.dart';
 import 'package:first_task_nts/core/constants/app_colors.dart';
 import 'package:first_task_nts/core/constants/app_radius.dart';
+import 'package:first_task_nts/core/errors/app_failure.dart';
 import 'package:first_task_nts/core/widgets/app_bottom_navigation.dart';
+import 'package:first_task_nts/core/widgets/app_button.dart';
 import 'package:first_task_nts/core/widgets/app_search_field.dart';
 import 'package:first_task_nts/features/attendance/data/datasources/attendance_local_data_source.dart';
 import 'package:first_task_nts/features/attendance/data/repositories/attendance_repository_impl.dart';
@@ -13,6 +16,15 @@ import 'package:first_task_nts/features/attendance/domain/usecases/filter_attend
 import 'package:first_task_nts/features/attendance/domain/usecases/get_attendance_logs.dart';
 import 'package:first_task_nts/features/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:first_task_nts/features/attendance/presentation/screens/attendance_logs_screen.dart';
+import 'package:first_task_nts/features/connection/domain/entities/database_url.dart';
+import 'package:first_task_nts/features/connection/domain/entities/validated_database.dart';
+import 'package:first_task_nts/features/connection/domain/repository/connection_repository.dart';
+import 'package:first_task_nts/features/connection/domain/usecases/get_saved_database_url.dart';
+import 'package:first_task_nts/features/connection/domain/usecases/save_database_url.dart';
+import 'package:first_task_nts/features/connection/domain/usecases/validate_database.dart';
+import 'package:first_task_nts/features/connection/domain/usecases/validate_database_url.dart';
+import 'package:first_task_nts/features/connection/presentation/cubit/database_setup_cubit.dart';
+import 'package:first_task_nts/features/connection/presentation/screens/database_url_setup_screen.dart';
 import 'package:first_task_nts/features/expenses/data/datasources/expense_local_data_source.dart';
 import 'package:first_task_nts/features/expenses/data/repositories/expense_repository_impl.dart';
 import 'package:first_task_nts/features/expenses/domain/usecases/filter_expenses.dart';
@@ -24,6 +36,13 @@ import 'package:first_task_nts/features/home/data/repositories/home_repository_i
 import 'package:first_task_nts/features/home/domain/usecases/check_in.dart';
 import 'package:first_task_nts/features/home/domain/usecases/get_today_session.dart';
 import 'package:first_task_nts/features/home/presentation/cubit/home_cubit.dart';
+import 'package:first_task_nts/features/login/domain/entities/auth_session.dart';
+import 'package:first_task_nts/features/login/domain/repository/auth_repository.dart';
+import 'package:first_task_nts/features/login/domain/usecases/request_password_reset.dart';
+import 'package:first_task_nts/features/login/domain/usecases/save_auth_token.dart';
+import 'package:first_task_nts/features/login/domain/usecases/sign_in.dart';
+import 'package:first_task_nts/features/login/presentation/cubit/login_cubit.dart';
+import 'package:first_task_nts/features/login/presentation/screens/login_screen.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 
 AttendanceCubit buildAttendanceCubit() => AttendanceCubit(
@@ -49,17 +68,99 @@ HomeCubit buildHomeCubit() {
   );
 }
 
-NtsApp buildApp({
+/// Offline stand-in for the Odoo backend: reports a valid database and keeps
+/// the saved address in memory, so tests never hit the network.
+class _FakeConnectionRepository implements ConnectionRepository {
+  DatabaseUrl? _saved;
+
+  @override
+  Future<ValidatedDatabase> validateDatabase(DatabaseUrl url) async =>
+      ValidatedDatabase(
+        database: 'nts-test',
+        baseUrl: url,
+        statusMessage: 'Database is valid and ready for mobile authentication.',
+      );
+
+  @override
+  Future<void> saveDatabaseUrl(DatabaseUrl url) async => _saved = url;
+
+  @override
+  Future<DatabaseUrl?> loadSavedDatabaseUrl() async => _saved;
+}
+
+DatabaseSetupCubit buildDatabaseSetupCubit() {
+  final ConnectionRepository repository = _FakeConnectionRepository();
+  return DatabaseSetupCubit(
+    validateDatabaseUrl: const ValidateDatabaseUrl(),
+    validateDatabase: ValidateDatabase(repository),
+    saveDatabaseUrl: SaveDatabaseUrl(repository),
+    getSavedDatabaseUrl: GetSavedDatabaseUrl(repository),
+  );
+}
+
+/// Offline stand-in for the authentication backend: grants a session and keeps
+/// the token in memory, so tests never hit the network.
+class _FakeAuthRepository implements AuthRepository {
+  final String password = 'correct-password';
+  String? token;
+
+  @override
+  Future<AuthSession> signIn({
+    required String email,
+    required String password,
+    required DatabaseUrl databaseUrl,
+  }) async {
+    if (password != this.password) {
+      throw const ServerValidationFailure('Incorrect email or password.');
+    }
+    return AuthSession(token: 'test-token', userName: email, database: databaseUrl.value.host);
+  }
+
+  @override
+  Future<String> requestPasswordReset({
+    required String email,
+    required DatabaseUrl databaseUrl,
+  }) async =>
+      'If $email belongs to an account, a reset link is on its way.';
+
+  @override
+  Future<void> saveAuthToken(String token) async => this.token = token;
+
+  @override
+  Future<String?> loadAuthToken() async => token;
+
+  @override
+  Future<void> clearAuthToken() async => token = null;
+}
+
+LoginCubit buildLoginCubit({AuthRepository? authRepository, ConnectionRepository? connection}) {
+  final AuthRepository auth = authRepository ?? _FakeAuthRepository();
+  return LoginCubit(
+    signIn: SignIn(auth),
+    requestPasswordReset: RequestPasswordReset(auth),
+    saveAuthToken: SaveAuthToken(auth),
+    getSavedDatabaseUrl: GetSavedDatabaseUrl(connection ?? _FakeConnectionRepository()),
+  );
+}
+
+MasaryApp buildApp({
   AttendanceCubit? attendanceCubit,
   ExpensesCubit? expensesCubit,
   HomeCubit? homeCubit,
   ProfileCubit? profileCubit,
+  DatabaseSetupCubit? databaseSetupCubit,
+  LoginCubit? loginCubit,
 }) {
-  return NtsApp(
+  return MasaryApp(
     attendanceCubit: attendanceCubit ?? buildAttendanceCubit(),
     expensesCubit: expensesCubit ?? buildExpensesCubit(),
     homeCubit: homeCubit ?? buildHomeCubit(),
     profileCubit: profileCubit ?? ProfileCubit(),
+    databaseSetupCubit: databaseSetupCubit ?? buildDatabaseSetupCubit(),
+    loginCubit: loginCubit ?? buildLoginCubit(),
+    // The app now starts on the database URL setup screen; the feature tests
+    // below drive the app shell directly.
+    home: const AppShell(),
   );
 }
 
@@ -109,6 +210,70 @@ bool navItemHasActiveBackground(WidgetTester tester, String label) {
 }
 
 void main() {
+  testWidgets('Database URL setup screen verifies the address, then hands over to the login screen',
+      (tester) async {
+    usePhoneSurface(tester);
+    final cubit = buildDatabaseSetupCubit();
+    final loginCubit = buildLoginCubit();
+    addTearDown(cubit.close);
+    addTearDown(loginCubit.close);
+
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: cubit),
+          BlocProvider.value(value: loginCubit),
+        ],
+        child: const MaterialApp(home: DatabaseUrlSetupScreen()),
+      ),
+    );
+    await tester.pump();
+
+    // The setup card leads with the field, which starts empty on a fresh install.
+    expect(
+      find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Text && widget.data == 'Database URL' && widget.style?.color == AppColors.teal,
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Enter your server address to continue'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'https://your-company.odoo.com'), findsOneWidget);
+    expect(tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text, isEmpty);
+
+    // Continue is greyed out while there is nothing to check.
+    expect(
+      tester.widget<AppButton>(find.widgetWithText(AppButton, 'Continue')).enabled,
+      isFalse,
+    );
+
+    // A non-https address is refused before any request is made.
+    await tester.enterText(find.byType(TextFormField), 'http://odoo.example.com');
+    await tester.pump();
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+
+    expect(find.text('The server address must use https://'), findsOneWidget);
+    expect(find.byType(LoginScreen), findsNothing);
+
+    // The real address reaches the server; one press validates, saves and
+    // hands over to the login screen without a second step.
+    await tester.enterText(find.byType(TextFormField), 'https://aalmosa-staging.odoo.com');
+    await tester.pump();
+    expect(find.text('The server address must use https://'), findsNothing);
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Database verified'), findsNothing);
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.text('Enter your credentials to continue'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'you@company.com'), findsOneWidget);
+    expect(find.byType(DatabaseUrlSetupScreen), findsNothing);
+  });
+
   testWidgets('Attendance Logs screen loads sections from static data', (tester) async {
     final cubit = buildAttendanceCubit();
     addTearDown(cubit.close);

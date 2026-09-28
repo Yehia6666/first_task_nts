@@ -2,8 +2,6 @@ import 'package:equatable/equatable.dart';
 
 enum AttendanceSessionStatus { notCheckedIn, checkedIn, checkedOut }
 
-/// Pure domain entity describing the current attendance session on the Home
-/// screen. No Flutter imports.
 class AttendanceSession extends Equatable {
   const AttendanceSession({
     required this.id,
@@ -23,8 +21,6 @@ class AttendanceSession extends Equatable {
   final AttendanceSessionStatus status;
   final DateTime? checkInAt;
 
-  /// Fraction (0..1) of the working window that has elapsed by [now],
-  /// clamped so the progress bar never overflows.
   double progressAt(DateTime now) {
     final total = targetEnd.difference(earliestEvent).inSeconds;
     if (total <= 0) return 0;

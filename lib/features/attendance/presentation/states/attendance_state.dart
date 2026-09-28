@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/attendance_filters.dart';
 import '../../domain/entities/attendance_log.dart';
 
-/// A grouped day section shown in the UI (e.g. "Today", "Yesterday").
 class AttendanceDaySection {
   const AttendanceDaySection({
     required this.title,

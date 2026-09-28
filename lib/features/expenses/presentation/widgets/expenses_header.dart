@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_header.dart';
 
-/// Expenses screen header: menu button + large navy title.
 class ExpensesHeader extends StatelessWidget {
   const ExpensesHeader({super.key});
 

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
-/// Section header: left expense count, right report creation action label.
 class ExpenseSectionHeader extends StatelessWidget {
   const ExpenseSectionHeader({
     super.key,

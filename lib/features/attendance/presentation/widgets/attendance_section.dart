@@ -6,7 +6,6 @@ import '../../../../core/utils/app_responsive.dart';
 import '../states/attendance_state.dart';
 import 'attendance_card.dart';
 
-/// A titled day group ("Today", "Yesterday", ...) rendered as a column of cards.
 class AttendanceSection extends StatelessWidget {
   const AttendanceSection({super.key, required this.section});
 

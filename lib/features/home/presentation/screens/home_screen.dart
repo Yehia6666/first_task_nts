@@ -13,8 +13,6 @@ import '../widgets/home_check_in_card.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_session_card.dart';
 
-/// Mobile-first Home screen: header (hamburger → drawer), the big check-in
-/// card and the current session card. All content is driven by [HomeCubit].
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 

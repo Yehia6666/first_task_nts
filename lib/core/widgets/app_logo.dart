@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
+import '../constants/app_radius.dart';
+import '../constants/app_sizes.dart';
 import '../theme/app_text_styles.dart';
 
-/// App logo mark: a rounded primary square with the brand initial, optionally
-/// followed by the wordmark. Reused by the Home header and the drawer.
 class AppLogo extends StatelessWidget {
   const AppLogo({
     super.key,
@@ -46,6 +46,31 @@ class AppLogo extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class AppLogoImage extends StatelessWidget {
+  const AppLogoImage({
+    super.key,
+    this.size = AppSizes.logoSize,
+    this.radius = AppRadius.lg,
+  });
+
+  final double size;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: Image.asset(
+        'assets/images/logo.jpeg',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        semanticLabel: 'App logo',
+      ),
     );
   }
 }

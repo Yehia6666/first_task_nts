@@ -4,7 +4,6 @@ import '../constants/app_radius.dart';
 import '../constants/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 
-/// Small pill badge used for statuses and labels.
 class AppStatusBadge extends StatelessWidget {
   const AppStatusBadge({
     super.key,

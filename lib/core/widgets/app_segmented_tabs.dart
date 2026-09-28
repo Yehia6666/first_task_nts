@@ -6,8 +6,6 @@ import '../constants/app_spacing.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_text_styles.dart';
 
-/// A segmented control: light rounded track with a white, elevated pill for the
-/// selected option. Active text is dark navy, inactive is muted gray.
 class AppSegmentedTabs extends StatelessWidget {
   const AppSegmentedTabs({
     super.key,

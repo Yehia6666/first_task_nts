@@ -8,8 +8,6 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/app_responsive.dart';
 import '../../domain/entities/attendance_filters.dart';
 
-/// Horizontally scrollable pill filter row: All / Check In / Check Out / Filter.
-/// The selected pill is dark navy with white text (per reference).
 class AttendanceFilterRow extends StatelessWidget {
   const AttendanceFilterRow({
     super.key,

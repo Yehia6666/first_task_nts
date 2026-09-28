@@ -5,7 +5,6 @@ import '../../../../core/constants/app_radius.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../domain/entities/expense.dart';
 
-/// Small rounded square containing a category icon.
 class ExpenseIcon extends StatelessWidget {
   const ExpenseIcon({super.key, required this.category});
 

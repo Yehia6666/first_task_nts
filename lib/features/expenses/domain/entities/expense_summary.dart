@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// Aggregated amounts shown by the summary cards.
 class ExpenseSummary extends Equatable {
   const ExpenseSummary({
     required this.toReport,

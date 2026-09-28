@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 
-/// Typography tokens. All text goes through these styles; never build raw
-/// `TextStyle`s with arbitrary sizes inside widgets.
 abstract final class AppTextStyles {
   static const TextStyle displayLarge = TextStyle(
     fontSize: 32,

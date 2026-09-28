@@ -6,8 +6,6 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/entities/attendance_filters.dart';
 
-/// Opens the status filter bottom sheet. The chosen option is pushed back via
-/// [onStatusSelected] and the sheet is closed by the caller.
 Future<void> showAttendanceFilterSheet(
   BuildContext context, {
   required AttendanceStatusFilter selectedStatus,

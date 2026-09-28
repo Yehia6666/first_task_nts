@@ -6,7 +6,6 @@ import '../../../../core/navigation/app_nav_cubit.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/app_responsive.dart';
 
-/// Centered title with a leading back arrow, minimal and borderless.
 class AttendanceHeader extends StatelessWidget {
   const AttendanceHeader({super.key});
 

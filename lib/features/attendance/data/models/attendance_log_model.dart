@@ -1,7 +1,5 @@
 import '../../domain/entities/attendance_log.dart';
 
-/// Data-layer model. Adds JSON (de)serialization so the static source can be
-/// swapped for an API later without touching domain or presentation.
 class AttendanceLogModel extends AttendanceLog {
   const AttendanceLogModel({
     required super.id,

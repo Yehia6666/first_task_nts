@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 
-/// Circular floating action button. Dark navy by default (per expenses
-/// reference), white icon, subtle shadow.
 class AppFloatingActionButton extends StatelessWidget {
   const AppFloatingActionButton({
     super.key,

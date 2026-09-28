@@ -10,9 +10,6 @@ import 'features/attendance/presentation/screens/attendance_logs_screen.dart';
 import 'features/expenses/presentation/screens/expenses_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
 
-/// App-level navigation shell. Owns the destination stack and the bottom
-/// navigation bar; both read the current destination from [AppNavCubit], which
-/// is the single source of truth for what screen is shown.
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
 
@@ -23,8 +20,6 @@ class AppShell extends StatelessWidget {
     AppBottomNavItem(icon: Icons.receipt_long_outlined, label: 'Expense'),
   ];
 
-  /// Bottom-nav index for a destination; drawer-only destinations (attendance,
-  /// settings) intentionally highlight nothing.
   static int _bottomNavIndex(AppDestination destination) => switch (destination) {
         AppDestination.home => 0,
         AppDestination.timeOff => 1,

@@ -8,7 +8,6 @@ import '../navigation/app_nav_cubit.dart';
 import '../theme/app_text_styles.dart';
 import 'app_logo.dart';
 
-/// Drawer entry: which destination it navigates to plus its icon and label.
 class _DrawerEntry {
   const _DrawerEntry({
     required this.destination,
@@ -54,10 +53,6 @@ const List<_DrawerEntry> _entries = [
   ),
 ];
 
-/// Application drawer opened from any screen with a menu/hamburger button
-/// (Home, Expenses). The selected item reflects [AppNavCubit], so it always
-/// matches the current destination, and tapping an item simply delegates
-/// navigation to the cubit.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 

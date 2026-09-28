@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Soft, low-opacity shadows. One elevation tier for cards, one lighter tier
-/// for floating elements like the search field.
 abstract final class AppShadows {
   static const List<BoxShadow> card = [
     BoxShadow(

@@ -7,8 +7,6 @@ import '../../domain/usecases/get_expenses.dart';
 import '../../domain/usecases/summarize_expenses.dart';
 import '../states/expenses_state.dart';
 
-/// Holds expense state, delegates business logic to use cases, and emits
-/// states the UI renders. Contains no layout/widget code.
 class ExpensesCubit extends Cubit<ExpensesState> {
   ExpensesCubit({
     required this.getExpenses,

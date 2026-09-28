@@ -6,11 +6,6 @@ import '../constants/app_spacing.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_text_styles.dart';
 
-/// Reusable search field. Defaults match the Expense reference: white surface
-/// background, large rounded corners, ~48px height, very subtle shadow, no
-/// visible border, and a muted gray leading search icon + hint. All visual
-/// properties are exposed as optional parameters so screens can deviate while
-/// staying on design-system tokens.
 class AppSearchField extends StatelessWidget {
   const AppSearchField({
     super.key,

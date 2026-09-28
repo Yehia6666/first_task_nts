@@ -5,7 +5,6 @@ import '../../../../core/constants/app_radius.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_search_field.dart';
 
-/// Expenses search field — white fill, rounded 20, ~48px tall per reference.
 class ExpenseSearchField extends StatelessWidget {
   const ExpenseSearchField({
     super.key,

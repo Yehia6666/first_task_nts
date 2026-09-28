@@ -1,5 +1,3 @@
-/// Border radius tokens. `card` and `search` follow the attendance reference
-/// (rounded 22–26 card, rounded 20–24 search) and stay consistent app-wide.
 abstract final class AppRadius {
   static const double sm = 8;
   static const double md = 12;

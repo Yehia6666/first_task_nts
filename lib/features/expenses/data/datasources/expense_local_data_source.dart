@@ -1,9 +1,6 @@
 import '../../domain/entities/expense.dart';
 import '../models/expense_model.dart';
 
-/// Static/mock data source. Simulates a small network delay and returns
-/// realistic records so the app can be developed before any API exists.
-/// Replaced later by a remote source without touching domain/presentation.
 class ExpenseLocalDataSource {
   Future<List<ExpenseModel>> getExpenses() async {
     await Future.delayed(const Duration(milliseconds: 400));

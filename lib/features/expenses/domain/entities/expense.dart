@@ -8,7 +8,6 @@ enum ExpenseOwner { me, team }
 
 enum PaymentMethod { cash, card, online }
 
-/// Pure domain entity. No Flutter imports.
 class Expense extends Equatable {
   const Expense({
     required this.id,

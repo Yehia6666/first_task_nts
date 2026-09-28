@@ -4,8 +4,6 @@ import '../constants/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/app_responsive.dart';
 
-/// Simple app header: optional leading/trailing widgets around a large bold
-/// navy title. Borderless, minimal.
 class AppHeader extends StatelessWidget {
   const AppHeader({
     super.key,

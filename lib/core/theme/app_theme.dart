@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import 'app_text_styles.dart';
 
-/// Builds the app-wide `ThemeData`. All UI keeps the design system tokens.
 abstract final class AppTheme {
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(

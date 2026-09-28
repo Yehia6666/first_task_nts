@@ -32,11 +32,9 @@ class HomeLoaded extends HomeState {
   final AttendanceSession session;
   final DateTime currentTime;
 
-  /// Fraction (0..1) of the working window elapsed at [currentTime].
   final double progress;
   final bool isCheckingIn;
 
-  /// One-time message for the UI to surface (e.g. check-in confirmation).
   final String? feedback;
 
   @override

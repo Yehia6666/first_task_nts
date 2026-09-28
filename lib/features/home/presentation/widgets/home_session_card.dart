@@ -8,10 +8,8 @@ import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../domain/entities/attendance_session.dart';
+import 'session_row.dart';
 
-/// White card below the check-in card. Header row with "Current Session" and a
-/// LOG HISTORY pill that navigates to the attendance logs, plus a few session
-/// detail rows.
 class HomeSessionCard extends StatelessWidget {
   const HomeSessionCard({
     super.key,
@@ -40,7 +38,7 @@ class HomeSessionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          _SessionRow(
+          SessionRow(
             icon: Icons.schedule_rounded,
             label: 'Checked In',
             value: session.checkInAt == null
@@ -48,7 +46,7 @@ class HomeSessionCard extends StatelessWidget {
                 : AppFormatters.timeOfDay(session.checkInAt!),
           ),
           const SizedBox(height: AppSpacing.md),
-          _SessionRow(
+          SessionRow(
             icon: Icons.flag_outlined,
             label: 'Status',
             trailing: AppStatusBadge(
@@ -65,7 +63,7 @@ class HomeSessionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          _SessionRow(
+          SessionRow(
             icon: Icons.place_outlined,
             label: 'Location',
             value: session.location,
@@ -76,7 +74,6 @@ class HomeSessionCard extends StatelessWidget {
   }
 }
 
-/// Rounded light pill button used for the LOG HISTORY action.
 class _LogHistoryButton extends StatelessWidget {
   const _LogHistoryButton({required this.onTap});
 
@@ -115,60 +112,6 @@ class _LogHistoryButton extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Single detail row: tinted icon circle, muted label, and a value or a
-/// trailing widget (e.g. the status badge).
-class _SessionRow extends StatelessWidget {
-  const _SessionRow({
-    required this.icon,
-    required this.label,
-    this.value,
-    this.trailing,
-  });
-
-  final IconData icon;
-  final String label;
-  final String? value;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: const BoxDecoration(
-            color: AppColors.surfaceVariant,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Icon(icon, size: 20, color: AppColors.textSecondary),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: AppTextStyles.bodyMedium),
-              const SizedBox(height: AppSpacing.xs),
-              if (trailing != null)
-                trailing!
-              else
-                Text(
-                  value ?? '—',
-                  style: AppTextStyles.titleSmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.4,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

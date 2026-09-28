@@ -8,8 +8,6 @@ import '../../domain/usecases/check_in.dart';
 import '../../domain/usecases/get_today_session.dart';
 import '../states/home_state.dart';
 
-/// Holds Home screen state, delegates business logic to use cases, and emits
-/// states the UI renders. Contains no layout/widget code.
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit({
     required this.getTodaySession,

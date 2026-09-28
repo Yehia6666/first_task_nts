@@ -1,8 +1,6 @@
 import '../entities/attendance_filters.dart';
 import '../entities/attendance_log.dart';
 
-/// Application logic for filtering and searching attendance logs.
-/// Kept outside widgets and the Cubit so it can be reused and unit-tested.
 class FilterAttendanceLogs {
   const FilterAttendanceLogs();
 
@@ -33,8 +31,6 @@ class FilterAttendanceLogs {
     }).toList();
   }
 
-  /// Matches every piece of text visible on an attendance card: the type label,
-  /// the address/details line, the status badge, and the worked-hours note.
   bool _matches(AttendanceLog log, String normalizedQuery) {
     final hours = log.workedHours == null
         ? ''

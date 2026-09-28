@@ -9,8 +9,6 @@ import '../../domain/entities/attendance_log.dart';
 import 'attendance_status_badge.dart';
 import 'attendance_type_icon.dart';
 
-/// White rounded card (radius 24) for a single attendance record.
-/// Layout: [icon] [info + badge] [time].
 class AttendanceCard extends StatelessWidget {
   const AttendanceCard({super.key, required this.log});
 

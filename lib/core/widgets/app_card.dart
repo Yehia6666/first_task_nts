@@ -5,8 +5,6 @@ import '../constants/app_radius.dart';
 import '../constants/app_spacing.dart';
 import '../theme/app_shadows.dart';
 
-/// White rounded surface card. Content-driven (never fixed height), optional
-/// hairline border / soft shadow / padding, and optional tap handling.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,

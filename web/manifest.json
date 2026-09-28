@@ -1,6 +1,6 @@
 {
-    "name": "first_task_nts",
-    "short_name": "first_task_nts",
+    "name": "Masary App",
+    "short_name": "Masary App",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

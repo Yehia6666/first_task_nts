@@ -5,8 +5,6 @@ import '../constants/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/app_header.dart';
 
-/// Simple placeholder screen used by bottom-nav destinations that are not
-/// implemented yet. Shows a centered icon + title + helper text.
 class PlaceholderScreen extends StatelessWidget {
   const PlaceholderScreen({
     super.key,

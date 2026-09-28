@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/app_segmented_tabs.dart';
 import '../../domain/entities/expense_tab.dart';
 
-/// Rounded segmented control for My Expenses / Team Expenses.
 class ExpenseTabs extends StatelessWidget {
   const ExpenseTabs({
     super.key,

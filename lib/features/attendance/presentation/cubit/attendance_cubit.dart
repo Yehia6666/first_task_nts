@@ -7,8 +7,6 @@ import '../../domain/usecases/filter_attendance_logs.dart';
 import '../../domain/usecases/get_attendance_logs.dart';
 import '../states/attendance_state.dart';
 
-/// Holds attendance state, delegates business logic to use cases, and emits
-/// states the UI renders. Contains no layout/widget code.
 class AttendanceCubit extends Cubit<AttendanceState> {
   AttendanceCubit({
     required this.getAttendanceLogs,

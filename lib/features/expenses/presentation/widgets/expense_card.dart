@@ -10,8 +10,6 @@ import '../../domain/entities/expense.dart';
 import 'expense_icon.dart';
 import 'expense_status_badge.dart';
 
-/// White rounded card for a single expense.
-/// Layout: [checkbox] [icon] [info] [amount + status].
 class ExpenseCard extends StatelessWidget {
   const ExpenseCard({
     super.key,

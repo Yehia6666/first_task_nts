@@ -4,7 +4,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../domain/entities/attendance_log.dart';
 
-/// Maps an attendance status to its design-system color pair.
 class AttendanceStatusBadge extends StatelessWidget {
   const AttendanceStatusBadge({super.key, required this.status});
 

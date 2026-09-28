@@ -6,7 +6,6 @@ import '../constants/app_spacing.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_text_styles.dart';
 
-/// Item descriptor for [AppBottomNavigation].
 class AppBottomNavItem {
   const AppBottomNavItem({
     required this.icon,
@@ -17,9 +16,6 @@ class AppBottomNavItem {
   final String label;
 }
 
-/// Modern floating rounded bottom navigation bar. The selected item gets a
-/// lavender pill with dark navy icon/label and a subtle shadow; inactive items
-/// are muted gray with no shadow.
 class AppBottomNavigation extends StatelessWidget {
   const AppBottomNavigation({
     super.key,

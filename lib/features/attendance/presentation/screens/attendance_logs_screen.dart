@@ -14,8 +14,6 @@ import '../widgets/attendance_header.dart';
 import '../widgets/attendance_search_field.dart';
 import '../widgets/attendance_section.dart';
 
-/// Mobile-first Attendance Logs screen. Header, search, filters and a scrollable
-/// list of day sections, all driven by [AttendanceCubit].
 class AttendanceLogsScreen extends StatefulWidget {
   const AttendanceLogsScreen({super.key});
 

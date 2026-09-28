@@ -4,7 +4,6 @@ enum AttendanceType { checkIn, checkOut }
 
 enum AttendanceStatus { completed, pending }
 
-/// Pure domain entity. No Flutter imports.
 class AttendanceLog extends Equatable {
   const AttendanceLog({
     required this.id,

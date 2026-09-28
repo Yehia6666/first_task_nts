@@ -5,7 +5,6 @@ import '../constants/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 import 'app_button.dart';
 
-/// Centered loading state. Optional [title]/[message]; spinner uses primary.
 class AppLoadingState extends StatelessWidget {
   const AppLoadingState({
     super.key,
@@ -47,7 +46,6 @@ class AppLoadingState extends StatelessWidget {
   }
 }
 
-/// Centered empty state: soft icon circle, title, optional helper + action.
 class AppEmptyState extends StatelessWidget {
   const AppEmptyState({
     super.key,
@@ -98,7 +96,6 @@ class AppEmptyState extends StatelessWidget {
   }
 }
 
-/// Centered error state using the error color pair, with a retry action.
 class AppErrorState extends StatelessWidget {
   const AppErrorState({
     super.key,

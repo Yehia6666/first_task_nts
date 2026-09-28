@@ -8,7 +8,6 @@ import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/expense_summary.dart';
 
-/// Row of three equal-width summary cards: TO REPORT / PENDING / TOTAL PAID.
 class ExpenseSummaryRow extends StatelessWidget {
   const ExpenseSummaryRow({
     super.key,
@@ -54,7 +53,6 @@ class ExpenseSummaryRow extends StatelessWidget {
   }
 }
 
-/// Single small white summary card with an uppercase label and bold amount.
 class ExpenseSummaryCard extends StatelessWidget {
   const ExpenseSummaryCard({
     super.key,

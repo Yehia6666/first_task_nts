@@ -7,8 +7,6 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/app_formatters.dart';
 import '../../domain/entities/attendance_session.dart';
 
-/// Three-part time summary inside the check-in card:
-/// earliest event (left) · elapsed box (center) · target end (right).
 class HomeTimeSummary extends StatelessWidget {
   const HomeTimeSummary({
     super.key,
@@ -79,7 +77,6 @@ class _TimeBlock extends StatelessWidget {
   }
 }
 
-/// Rounded mint box with the elapsed percentage, success pair coloring.
 class _ElapsedBox extends StatelessWidget {
   const _ElapsedBox({required this.percent});
 

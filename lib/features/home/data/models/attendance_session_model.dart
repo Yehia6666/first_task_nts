@@ -1,8 +1,5 @@
 import '../../domain/entities/attendance_session.dart';
 
-/// Data-layer model. Adds JSON (de)serialization and a [copyWith] so the
-/// static source can be swapped for an API later without touching domain or
-/// presentation.
 class AttendanceSessionModel extends AttendanceSession {
   const AttendanceSessionModel({
     required super.id,
