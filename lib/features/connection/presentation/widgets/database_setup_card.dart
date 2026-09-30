@@ -54,7 +54,7 @@ class DatabaseSetupCard extends StatelessWidget {
           AppTextField(
             controller: controller,
             focusNode: focusNode,
-            hintText: 'https://your-company.odoo.com',
+            hintText: 'Server URL',
             prefixIcon: Icons.link_rounded,
             keyboardType: TextInputType.url,
             textInputAction: TextInputAction.go,

@@ -1,5 +1,6 @@
 import '../../../connection/domain/entities/database_url.dart';
 import '../../domain/entities/auth_session.dart';
+import '../../domain/entities/authenticated_user.dart';
 import '../../domain/repository/auth_repository.dart';
 import '../datasources/auth_local_data_source.dart';
 import '../datasources/auth_remote_data_source.dart';
@@ -31,6 +32,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required DatabaseUrl databaseUrl,
   }) =>
       _remoteDataSource.forgotPassword(email: email, databaseUrl: databaseUrl);
+
+  @override
+  Future<AuthenticatedUser> loadCurrentUser({
+    required String token,
+    required DatabaseUrl databaseUrl,
+  }) =>
+      _remoteDataSource.loadCurrentUser(token: token, databaseUrl: databaseUrl);
 
   @override
   Future<void> saveAuthToken(String token) => _localDataSource.writeToken(token);

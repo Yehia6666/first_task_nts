@@ -39,3 +39,26 @@ class UnexpectedResponseFailure extends AppFailure {
         'The server replied with an unexpected response. Make sure the address points to an Odoo server.',
   ]);
 }
+
+/// Why the account behind a freshly issued token cannot be used.
+enum AccountRejection {
+  /// The token is unknown, expired, or refused by the server.
+  sessionExpired,
+
+  /// The account is disabled, blocked, or otherwise not active.
+  accountDisabled,
+
+  /// The account has been deleted or archived.
+  accountDeleted,
+
+  /// The server did not return the fields the app needs to open the shell.
+  profileIncomplete,
+}
+
+/// The token was accepted at sign-in but the account behind it cannot be used.
+/// The stored token must be dropped before anything else is attempted.
+class AccountRejectedFailure extends AppFailure {
+  const AccountRejectedFailure(super.message, {required this.reason});
+
+  final AccountRejection reason;
+}

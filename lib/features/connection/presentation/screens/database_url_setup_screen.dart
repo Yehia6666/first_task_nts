@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_radius.dart';
+import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/app_responsive.dart';
-import '../../../../core/widgets/app_logo.dart';
 import '../../../login/presentation/screens/login_screen.dart';
 import '../cubit/database_setup_cubit.dart';
 import '../states/database_setup_state.dart';
@@ -38,11 +39,9 @@ class _DatabaseUrlSetupScreenState extends State<DatabaseUrlSetupScreen> {
     super.dispose();
   }
 
-  void _openLogin(BuildContext context, DatabaseSetupReady state) {
+  void _openLogin(BuildContext context) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => LoginScreen(database: state.database),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
     );
   }
 
@@ -64,7 +63,7 @@ class _DatabaseUrlSetupScreenState extends State<DatabaseUrlSetupScreen> {
       listener: (context, state) => _syncField(state.url),
       child: BlocListener<DatabaseSetupCubit, DatabaseSetupState>(
         listenWhen: (previous, current) => current is DatabaseSetupReady,
-        listener: (context, state) => _openLogin(context, state as DatabaseSetupReady),
+        listener: (context, state) => _openLogin(context),
         child: Scaffold(
           backgroundColor: AppColors.background,
           body: DecoratedBox(
@@ -97,13 +96,30 @@ class _DatabaseUrlSetupScreenState extends State<DatabaseUrlSetupScreen> {
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            minHeight: constraints.maxHeight - verticalPadding * 2,
+            // The window can be laid out before its size is known, and the
+            // scroll view already has the padding subtracted, so the remaining
+            // height can go negative. A negative minHeight is not a valid
+            // constraint and takes the whole screen down with it.
+            minHeight: (constraints.maxHeight - verticalPadding * 2)
+                .clamp(0.0, double.infinity),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Center(child: AppLogoImage()),
+              Center(
+                child: ClipRRect(
+                  borderRadius:
+                      const BorderRadius.all(Radius.circular(AppRadius.lg)),
+                  child: Image.asset(
+                    'assets/images/logo.jpeg',
+                    width: AppSizes.logoSize,
+                    height: AppSizes.logoSize,
+                    fit: BoxFit.cover,
+                    semanticLabel: 'App logo',
+                  ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.xxl),
               Center(
                 child: ConstrainedBox(

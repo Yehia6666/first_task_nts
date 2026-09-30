@@ -6,16 +6,17 @@ import '../constants/app_radius.dart';
 import '../constants/app_spacing.dart';
 import '../navigation/app_nav_cubit.dart';
 import '../theme/app_text_styles.dart';
-import 'app_logo.dart';
+
+const double _drawerLogoSize = 40;
 
 class _DrawerEntry {
   const _DrawerEntry({
-    required this.destination,
     required this.icon,
     required this.label,
+    this.destination,
   });
 
-  final AppDestination destination;
+  final AppDestination? destination;
   final IconData icon;
   final String label;
 }
@@ -43,8 +44,12 @@ const List<_DrawerEntry> _entries = [
   ),
   _DrawerEntry(
     destination: AppDestination.attendance,
-    icon: Icons.calendar_month_outlined,
+    icon: Icons.schedule_outlined,
     label: 'Attendance',
+  ),
+  _DrawerEntry(
+    icon: Icons.inbox_outlined,
+    label: 'Approval Requests',
   ),
   _DrawerEntry(
     destination: AppDestination.settings,
@@ -80,7 +85,28 @@ class AppDrawer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AppLogo(wordmark: 'HitekNOFAL', size: 40),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        BorderRadius.circular(_drawerLogoSize * 0.3),
+                    child: Image.asset(
+                      'assets/images/logo.jpeg',
+                      width: _drawerLogoSize,
+                      height: _drawerLogoSize,
+                      fit: BoxFit.cover,
+                      semanticLabel: 'App logo',
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    'Masary',
+                    style: AppTextStyles.titleLarge
+                        .copyWith(fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
               const SizedBox(height: AppSpacing.lg),
               const Divider(height: 1, thickness: 1, color: AppColors.border),
               const SizedBox(height: AppSpacing.sm),
@@ -91,9 +117,14 @@ class AppDrawer extends StatelessWidget {
                     for (final entry in _entries)
                       _DrawerItem(
                         entry: entry,
-                        selected: destination == entry.destination,
+                        selected:
+                            entry.destination != null &&
+                                destination == entry.destination,
                         onTap: () {
-                          context.read<AppNavCubit>().select(entry.destination);
+                          final target = entry.destination;
+                          if (target != null) {
+                            context.read<AppNavCubit>().select(target);
+                          }
                           Navigator.of(context).pop();
                         },
                       ),
@@ -121,19 +152,19 @@ class _DrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = selected ? AppColors.primary : AppColors.textMuted;
+    final Color color = selected ? AppColors.teal : AppColors.textMuted;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Material(
-        color: selected ? AppColors.primaryContainer : Colors.transparent,
+        color: selected ? AppColors.tealContainer : Colors.transparent,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
+              horizontal: AppSpacing.lg,
               vertical: AppSpacing.md,
             ),
             child: Row(

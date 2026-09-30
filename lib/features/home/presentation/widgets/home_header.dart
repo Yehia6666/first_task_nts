@@ -1,10 +1,10 @@
 import 'package:first_task_nts/features/profile/presentation/screen/profile_screen.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/app_responsive.dart';
-import '../../../../core/widgets/app_logo.dart';
+
+const double _headerLogoSize = 30;
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key, required this.onMenuTap});
@@ -29,7 +29,18 @@ class HomeHeader extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const AppLogo(),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(_headerLogoSize * 0.2),
+            child: Image.asset(
+              'assets/images/logo.jpeg',
+              width: _headerLogoSize,
+              height: _headerLogoSize,
+              fit: BoxFit.cover,
+              semanticLabel: 'App logo',
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+
           const Spacer(),
           _NotificationBell(),
           const SizedBox(width: AppSpacing.sm),

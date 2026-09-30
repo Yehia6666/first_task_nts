@@ -61,19 +61,21 @@ class AuthPayloadMapper {
         DioExceptionType.sendTimeout ||
         DioExceptionType.receiveTimeout ||
         DioExceptionType.transformTimeout =>
-          const TimeoutFailure(),
+          const TimeoutFailure('Connection timed out.'),
         DioExceptionType.badCertificate => const NetworkFailure(
             'The server certificate could not be verified. Check the address and try again.',
           ),
         DioExceptionType.badResponse => _responseFailure(error.response),
         DioExceptionType.cancel =>
           const NetworkFailure('The request was cancelled.'),
-        // A body that claims to be JSON but is not is a bad answer, not a
-        // broken connection.
         DioExceptionType.unknown when error.error is FormatException =>
           const UnexpectedResponseFailure(),
-        DioExceptionType.connectionError || DioExceptionType.unknown =>
-          const NetworkFailure(),
+        DioExceptionType.connectionError => const NetworkFailure(
+            'No internet connection. Check your network and try again.',
+          ),
+        _ => const NetworkFailure(
+            'The connection to the server failed. Check the address and your internet connection.',
+          ),
       };
 
   AppFailure _responseFailure(Response<dynamic>? response) {
@@ -82,17 +84,21 @@ class AuthPayloadMapper {
       return const UnexpectedResponseFailure();
     }
 
-    // Reuse the API's own message when the error body carries one.
     final String? reported = reportedMessage(response?.data);
 
     return switch (statusCode) {
-      404 => ServerRequestFailure(
-          reported ??
-              'This address does not expose the authentication API. Check that it points to an Odoo server.',
-          statusCode: statusCode,
-        ),
       401 || 403 => ServerRequestFailure(
           reported ?? 'The server refused the request (HTTP $statusCode).',
+          statusCode: statusCode,
+        ),
+      404 => ServerRequestFailure(
+          reported ??
+              'The server has no authentication endpoint at this address. Check the server URL.',
+          statusCode: statusCode,
+        ),
+      405 => ServerRequestFailure(
+          reported ??
+              'The server does not accept this request method for the authentication endpoint.',
           statusCode: statusCode,
         ),
       >= 500 => ServerRequestFailure(

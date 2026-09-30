@@ -60,7 +60,7 @@ class HomeCheckInButton extends StatelessWidget {
                       : Icon(
                           isCheckedIn
                               ? Icons.check_rounded
-                              : Icons.login_rounded,
+                              : Icons.exit_to_app_outlined,
                           size: 20,
                           color: AppColors.onPrimary,
                         ),

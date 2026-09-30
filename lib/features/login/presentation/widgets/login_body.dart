@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_radius.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/app_responsive.dart';
-import '../../../../core/widgets/app_logo.dart';
-import '../../../connection/domain/entities/validated_database.dart';
 import 'login_card.dart';
 
 class LoginBody extends StatelessWidget {
   const LoginBody({
     super.key,
-    required this.database,
     required this.formKey,
     required this.emailController,
     required this.passwordController,
@@ -20,13 +18,14 @@ class LoginBody extends StatelessWidget {
     required this.canSubmit,
     required this.isSubmitting,
     required this.errorMessage,
+    required this.errorTitle,
+    required this.submitLabel,
     required this.onChanged,
     required this.onTogglePasswordVisibility,
     required this.onSubmit,
     required this.onForgotPassword,
   });
 
-  final ValidatedDatabase database;
   final GlobalKey<FormState> formKey;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -36,6 +35,8 @@ class LoginBody extends StatelessWidget {
   final bool canSubmit;
   final bool isSubmitting;
   final String? errorMessage;
+  final String? errorTitle;
+  final String submitLabel;
   final VoidCallback onChanged;
   final VoidCallback onTogglePasswordVisibility;
   final VoidCallback onSubmit;
@@ -62,14 +63,26 @@ class LoginBody extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(child: AppLogoImage(size: _logoSize(context))),
+              Center(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(AppRadius.lg),
+                  ),
+                  child: Image.asset(
+                    'assets/images/logo.jpeg',
+                    width: _logoSize(context),
+                    height: _logoSize(context),
+                    fit: BoxFit.cover,
+                    semanticLabel: 'App logo',
+                  ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.xxl),
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: _maxCardWidth),
                   child: LoginCard(
                     formKey: formKey,
-                    database: database,
                     emailController: emailController,
                     passwordController: passwordController,
                     emailFocusNode: emailFocusNode,
@@ -78,6 +91,8 @@ class LoginBody extends StatelessWidget {
                     canSubmit: canSubmit,
                     isSubmitting: isSubmitting,
                     errorMessage: errorMessage,
+                    errorTitle: errorTitle,
+                    submitLabel: submitLabel,
                     onChanged: onChanged,
                     onTogglePasswordVisibility: onTogglePasswordVisibility,
                     onSubmit: onSubmit,

@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 
+import '../../../../core/errors/app_failure.dart';
 import '../../../connection/domain/entities/database_url.dart';
+import '../models/authenticated_user_model.dart';
 import '../models/forgot_password_request_model.dart';
 import '../models/message_response_model.dart';
 import '../models/sign_in_request_model.dart';
@@ -26,6 +28,7 @@ class AuthRemoteDataSource {
 
   static const String _signInPath = 'api/v1/auth/signin';
   static const String _forgotPasswordPath = 'api/v1/auth/forgot-password';
+  static const String _currentUserPath = 'api/v1/auth/profile';
 
   Future<SignInResponseModel> signIn({
     required String email,
@@ -77,6 +80,64 @@ class AuthRemoteDataSource {
 
     return MessageResponseModel.fromJson(payload).message ??
         'If this address belongs to an account, a reset link is on its way.';
+  }
+
+  Future<AuthenticatedUserModel> loadCurrentUser({
+    required String token,
+    required DatabaseUrl databaseUrl,
+  }) async {
+    try {
+      final Map<String, dynamic> payload = _mapper.payloadOf(
+        await _get(databaseUrl, _currentUserPath, token),
+      );
+
+      if (_mapper.isRejected(payload)) {
+        throw _mapper.rejectionOf(
+          payload,
+          fallback: 'The server could not confirm this account.',
+        );
+      }
+
+      final AuthenticatedUserModel? user =
+          AuthenticatedUserModel.fromJson(_mapper.resourceOf(payload));
+      if (user != null) return user;
+
+      throw _mapper.rejectionOf(
+        payload,
+        fallback: 'The server did not return your account details.',
+      );
+    } on AppFailure catch (failure) {
+      throw _refusedTokenAs(failure);
+    }
+  }
+
+  static AppFailure _refusedTokenAs(AppFailure failure) {
+    if (failure is ServerRequestFailure &&
+        (failure.statusCode == 401 || failure.statusCode == 403)) {
+      return const AccountRejectedFailure(
+        'The server refused this session. Please sign in again.',
+        reason: AccountRejection.sessionExpired,
+      );
+    }
+    return failure;
+  }
+
+  Future<Response<dynamic>> _get(
+    DatabaseUrl databaseUrl,
+    String path,
+    String token,
+  ) async {
+    try {
+      return await _dio.get<dynamic>(
+        databaseUrl.endpoint(path),
+        options: Options(
+          headers: <String, dynamic>{'Authorization': 'Bearer $token'},
+          receiveDataWhenStatusError: true,
+        ),
+      );
+    } on DioException catch (error) {
+      throw _mapper.failureOf(error);
+    }
   }
 
   Future<Response<dynamic>> _post(

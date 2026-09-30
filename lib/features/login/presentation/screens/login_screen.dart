@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app_shell.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../connection/domain/entities/validated_database.dart';
+import '../../../../core/errors/app_failure.dart';
 import '../cubit/login_cubit.dart';
 import '../states/login_state.dart';
 import '../utils/login_form_validators.dart';
@@ -11,9 +11,7 @@ import '../widgets/forgot_password_dialog.dart';
 import '../widgets/login_body.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.database});
-
-  final ValidatedDatabase database;
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -28,6 +26,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
 
+  /// Guards against a second navigation while the shell is on its way.
+  bool _isNavigating = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -38,6 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _submit() {
+    if (_isNavigating) return;
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
@@ -63,13 +65,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showMessage(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  /// Replaces the whole stack with the shell, so the login form cannot be
+  /// reached again with the back gesture.
   void _openAppShell(BuildContext context) {
-    if (!context.mounted) return;
+    if (_isNavigating || !context.mounted) return;
+    _isNavigating = true;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute<void>(builder: (_) => const AppShell()),
       (route) => false,
@@ -90,7 +96,6 @@ class _LoginScreenState extends State<LoginScreen> {
         body: SafeArea(
           child: BlocBuilder<LoginCubit, LoginState>(
             builder: (context, state) => LoginBody(
-              database: widget.database,
               formKey: _formKey,
               emailController: _emailController,
               passwordController: _passwordController,
@@ -98,8 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
               passwordFocusNode: _passwordFocusNode,
               obscurePassword: _obscurePassword,
               canSubmit: _canSubmit(state),
-              isSubmitting: state is LoginSubmitting,
+              isSubmitting: state.isBusy,
+              errorTitle: _errorTitleOf(state),
               errorMessage: _errorMessageOf(state),
+              submitLabel: _submitLabelOf(state),
               onChanged: _onFieldChanged,
               onTogglePasswordVisibility: () =>
                   setState(() => _obscurePassword = !_obscurePassword),
@@ -131,7 +138,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _errorMessageOf(LoginState state) => switch (state) {
         LoginInvalidCredentials(message: final message) => message,
+        LoginAccountRejected(message: final message) => message,
+        LoginVerificationFailed(message: final message) => message,
         LoginFailure(message: final message) => message,
         _ => null,
+      };
+
+  /// Says which check stopped the sign-in, so the message below it makes sense
+  /// on its own.
+  String? _errorTitleOf(LoginState state) => switch (state) {
+        LoginAccountRejected(reason: final reason) => _titleOf(reason),
+        LoginVerificationFailed() => 'Could not verify your account',
+        _ => null,
+      };
+
+  /// A failed check kept the token, so the button itself is the retry.
+  String _submitLabelOf(LoginState state) =>
+      state is LoginVerificationFailed ? 'Try again' : 'Sign in';
+
+  static String _titleOf(AccountRejection reason) => switch (reason) {
+        AccountRejection.sessionExpired => 'Your session is no longer valid',
+        AccountRejection.accountDisabled => 'This account is disabled',
+        AccountRejection.accountDeleted => 'This account was deleted',
+        AccountRejection.profileIncomplete => 'Your profile is incomplete',
       };
 }

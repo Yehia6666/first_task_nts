@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class HomeIllustration extends StatelessWidget {
-  const HomeIllustration({super.key, this.height = 176});
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
 
-  final double height;
+class HomeIllustration extends StatelessWidget {
+  const HomeIllustration({super.key, this.size = AppSizes.homeMascotSize});
+
+  final double size;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: double.infinity,
-      child: Center(
-        child: SvgPicture.asset(
-          'assets/images/home/worker_mascot.svg',
-          width: height * 1.18,
-          fit: BoxFit.contain,
-          semanticsLabel: 'Construction worker mascot',
-        ),
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: AppColors.tealContainer,
+        shape: BoxShape.circle,
+      ),
+      child: SvgPicture.asset(
+        'assets/images/home/worker_mascot.svg',
+        width: size * 0.82,
+        height: size * 0.82,
+        fit: BoxFit.contain,
+        semanticsLabel: 'Construction worker mascot',
       ),
     );
   }

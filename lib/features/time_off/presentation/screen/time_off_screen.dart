@@ -1,6 +1,9 @@
 import 'package:first_task_nts/core/theme/app_text_styles.dart';
 import 'package:first_task_nts/core/widgets/app_drawer.dart';
 import 'package:first_task_nts/features/time_off/presentation/widget/calender_timeoff.dart';
+import 'package:first_task_nts/features/time_off/presentation/widget/my_requests_view.dart';
+import 'package:first_task_nts/features/time_off/presentation/widget/request_allocation_fab.dart';
+import 'package:first_task_nts/features/time_off/presentation/widget/time_off_empty_state.dart';
 import 'package:first_task_nts/features/time_off/presentation/widget/time_off_taps.dart';
 import 'package:flutter/material.dart';
 
@@ -50,13 +53,32 @@ class TimeOffScreen extends StatelessWidget {
           padding: EdgeInsetsGeometry.all(20),
           child: TabBarView(
             children: [
-              Text('My Requestes'),
-              Text('Balance'),
-              Text('Allocations'),
+              const MyRequestsView(),
+              TimeOffEmptyState(
+                icon: Icons.event_busy_outlined,
+                message: 'No allocated time off types found.',
+              ),
+              TimeOffEmptyState(
+                icon: Icons.event_busy_outlined,
+                message: 'No allocation requests found.',
+              ),
               CalenderTimeoff(),
             ],
           ),
         ),
+        floatingActionButton: Builder(
+          builder: (scaffoldContext) {
+            final TabController controller =
+                DefaultTabController.of(scaffoldContext);
+            return AnimatedBuilder(
+              animation: controller,
+              builder: (context, child) => controller.index == 2
+                  ? const RequestAllocationFab()
+                  : const SizedBox.shrink(),
+            );
+          },
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }

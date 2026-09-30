@@ -8,6 +8,15 @@ class TimeOffTaps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(titel, style: AppTextStyles.bodyMedium);
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(
+        titel,
+        maxLines: 1,
+        softWrap: false,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.bodyMedium.copyWith(fontSize: 13),
+      ),
+    );
   }
 }

@@ -41,9 +41,9 @@ class SessionRow extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               if (trailing != null)
                 trailing!
-              else
+              else if (value != null)
                 Text(
-                  value ?? '—',
+                  value!,
                   style: AppTextStyles.titleSmall.copyWith(
                     fontWeight: FontWeight.w600,
                     height: 1.4,

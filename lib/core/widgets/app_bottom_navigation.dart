@@ -83,7 +83,7 @@ class _BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.textPrimary : AppColors.textMuted;
+    final color = selected ? AppColors.teal : AppColors.textMuted;
 
     return InkWell(
       onTap: onTap,
@@ -92,7 +92,7 @@ class _BottomNavItem extends StatelessWidget {
         height: 56,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? AppColors.primaryContainer : Colors.transparent,
+          color: selected ? AppColors.tealContainer : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           boxShadow: selected ? AppShadows.subtle : null,
         ),

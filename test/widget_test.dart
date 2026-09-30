@@ -37,12 +37,18 @@ import 'package:first_task_nts/features/home/domain/usecases/check_in.dart';
 import 'package:first_task_nts/features/home/domain/usecases/get_today_session.dart';
 import 'package:first_task_nts/features/home/presentation/cubit/home_cubit.dart';
 import 'package:first_task_nts/features/login/domain/entities/auth_session.dart';
+import 'package:first_task_nts/features/login/domain/entities/authenticated_user.dart';
 import 'package:first_task_nts/features/login/domain/repository/auth_repository.dart';
+import 'package:first_task_nts/features/login/domain/usecases/clear_auth_token.dart';
 import 'package:first_task_nts/features/login/domain/usecases/request_password_reset.dart';
 import 'package:first_task_nts/features/login/domain/usecases/save_auth_token.dart';
 import 'package:first_task_nts/features/login/domain/usecases/sign_in.dart';
+import 'package:first_task_nts/features/login/domain/usecases/verify_authenticated_account.dart';
 import 'package:first_task_nts/features/login/presentation/cubit/login_cubit.dart';
 import 'package:first_task_nts/features/login/presentation/screens/login_screen.dart';
+import 'package:first_task_nts/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:first_task_nts/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:first_task_nts/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 
 AttendanceCubit buildAttendanceCubit() => AttendanceCubit(
@@ -104,6 +110,12 @@ class _FakeAuthRepository implements AuthRepository {
   final String password = 'correct-password';
   String? token;
 
+  /// The account the current-user call reports. Set it to refuse a sign-in.
+  AuthenticatedUser user = const AuthenticatedUser(
+    name: 'Nour El-Sayed',
+    email: 'nour@example.com',
+  );
+
   @override
   Future<AuthSession> signIn({
     required String email,
@@ -115,6 +127,13 @@ class _FakeAuthRepository implements AuthRepository {
     }
     return AuthSession(token: 'test-token', userName: email, database: databaseUrl.value.host);
   }
+
+  @override
+  Future<AuthenticatedUser> loadCurrentUser({
+    required String token,
+    required DatabaseUrl databaseUrl,
+  }) async =>
+      user;
 
   @override
   Future<String> requestPasswordReset({
@@ -140,11 +159,20 @@ LoginCubit buildLoginCubit({AuthRepository? authRepository, ConnectionRepository
     requestPasswordReset: RequestPasswordReset(auth),
     saveAuthToken: SaveAuthToken(auth),
     getSavedDatabaseUrl: GetSavedDatabaseUrl(connection ?? _FakeConnectionRepository()),
+    verifyAuthenticatedAccount: VerifyAuthenticatedAccount(auth),
+    clearAuthToken: ClearAuthToken(auth),
   );
 }
 
-MasaryApp buildApp({
-  AttendanceCubit? attendanceCubit,
+ProfileCubit buildProfileCubit() => ProfileCubit(
+      getUserProfile: GetUserProfile(
+        ProfileRepositoryImpl(ProfileRemoteDataSource()),
+        _FakeAuthRepository(),
+        GetSavedDatabaseUrl(_FakeConnectionRepository()),
+      ),
+    );
+
+MasaryApp buildApp({  AttendanceCubit? attendanceCubit,
   ExpensesCubit? expensesCubit,
   HomeCubit? homeCubit,
   ProfileCubit? profileCubit,
@@ -155,7 +183,7 @@ MasaryApp buildApp({
     attendanceCubit: attendanceCubit ?? buildAttendanceCubit(),
     expensesCubit: expensesCubit ?? buildExpensesCubit(),
     homeCubit: homeCubit ?? buildHomeCubit(),
-    profileCubit: profileCubit ?? ProfileCubit(),
+    profileCubit: profileCubit ?? buildProfileCubit(),
     databaseSetupCubit: databaseSetupCubit ?? buildDatabaseSetupCubit(),
     loginCubit: loginCubit ?? buildLoginCubit(),
     // The app now starts on the database URL setup screen; the feature tests
@@ -206,7 +234,7 @@ bool navItemHasActiveBackground(WidgetTester tester, String label) {
       matching: find.byType(Container),
     ).first,
   ).decoration! as BoxDecoration;
-  return decoration.color == AppColors.primaryContainer;
+  return decoration.color == AppColors.tealContainer;
 }
 
 void main() {
@@ -239,7 +267,7 @@ void main() {
     );
     expect(find.text('Enter your server address to continue'), findsOneWidget);
     expect(find.text('Continue'), findsOneWidget);
-    expect(find.widgetWithText(TextFormField, 'https://your-company.odoo.com'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Server URL'), findsOneWidget);
     expect(tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text, isEmpty);
 
     // Continue is greyed out while there is nothing to check.
@@ -448,13 +476,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     // Header brand and all navigation items are present.
-    expect(find.text('HitekNOFAL'), findsOneWidget);
-    for (final label in ['Home', 'Time Off', 'Payroll', 'Expense', 'Attendance', 'Settings']) {
+    expect(find.text('Masary'), findsOneWidget);
+    for (final label in ['Home', 'Time Off', 'Payroll', 'Expense', 'Attendance', 'Approval Requests', 'Settings']) {
       expect(find.descendant(of: find.byType(Drawer), matching: find.text(label)), findsOneWidget);
     }
 
     // Home is the active drawer item.
-    expect(drawerItemColor(tester, 'Home'), AppColors.primaryContainer);
+    expect(drawerItemColor(tester, 'Home'), AppColors.tealContainer);
     for (final label in ['Time Off', 'Payroll', 'Expense', 'Attendance', 'Settings']) {
       expect(drawerItemColor(tester, label), Colors.transparent);
     }
@@ -490,7 +518,7 @@ void main() {
 
     // Open the drawer: Home is selected.
     await openDrawer();
-    expect(drawerItemColor(tester, 'Home'), AppColors.primaryContainer);
+    expect(drawerItemColor(tester, 'Home'), AppColors.tealContainer);
 
     // Navigate to Expense from the drawer.
     await tester.tap(find.descendant(of: find.byType(Drawer), matching: find.text('Expense')));
@@ -504,7 +532,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await openDrawer();
-    expect(drawerItemColor(tester, 'Home'), AppColors.primaryContainer);
+    expect(drawerItemColor(tester, 'Home'), AppColors.tealContainer);
     for (final label in ['Time Off', 'Payroll', 'Expense', 'Attendance', 'Settings']) {
       expect(drawerItemColor(tester, label), Colors.transparent);
     }
@@ -711,7 +739,7 @@ void main() {
         ).decoration! as BoxDecoration;
 
     bool hasActiveBackground(String label) =>
-        itemDecoration(label).color == AppColors.primaryContainer;
+        itemDecoration(label).color == AppColors.tealContainer;
 
     bool hasShadow(String label) =>
         (itemDecoration(label).boxShadow ?? const []).isNotEmpty;
@@ -770,14 +798,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     // The same application drawer is available and Expense is selected.
-    expect(find.text('HitekNOFAL'), findsOneWidget);
-    for (final label in ['Home', 'Time Off', 'Payroll', 'Expense', 'Attendance', 'Settings']) {
+    expect(find.text('Masary'), findsOneWidget);
+    for (final label in ['Home', 'Time Off', 'Payroll', 'Expense', 'Attendance', 'Approval Requests', 'Settings']) {
       expect(
         find.descendant(of: find.byType(Drawer), matching: find.text(label)),
         findsOneWidget,
       );
     }
-    expect(drawerItemColor(tester, 'Expense'), AppColors.primaryContainer);
+    expect(drawerItemColor(tester, 'Expense'), AppColors.tealContainer);
     expect(drawerItemColor(tester, 'Home'), Colors.transparent);
 
     // Selecting Home from this drawer navigates there and closes the drawer.

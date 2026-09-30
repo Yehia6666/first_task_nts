@@ -22,6 +22,9 @@ class HomeSessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasSession =
+        session.status != AttendanceSessionStatus.notCheckedIn;
+
     return AppCard(
       radius: AppRadius.xl,
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -38,36 +41,43 @@ class HomeSessionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          SessionRow(
-            icon: Icons.schedule_rounded,
-            label: 'Checked In',
-            value: session.checkInAt == null
-                ? 'Not yet'
-                : AppFormatters.timeOfDay(session.checkInAt!),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SessionRow(
-            icon: Icons.flag_outlined,
-            label: 'Status',
-            trailing: AppStatusBadge(
-              label: session.status == AttendanceSessionStatus.notCheckedIn
-                  ? 'Not Checked In'
-                  : 'Present',
-              background: session.status == AttendanceSessionStatus.notCheckedIn
-                  ? AppColors.warningContainer
-                  : AppColors.successContainer,
-              foreground: session.status == AttendanceSessionStatus.notCheckedIn
-                  ? AppColors.warningDark
-                  : AppColors.successDark,
-              showDot: true,
+          if (!hasSession)
+            const SessionRow(
+              icon: Icons.schedule_rounded,
+              label: 'No Active Session',
+            )
+          else ...[
+            SessionRow(
+              icon: Icons.schedule_rounded,
+              label: 'Checked In',
+              value: session.checkInAt == null
+                  ? 'Not yet'
+                  : AppFormatters.timeOfDay(session.checkInAt!),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SessionRow(
-            icon: Icons.place_outlined,
-            label: 'Location',
-            value: session.location,
-          ),
+            const SizedBox(height: AppSpacing.md),
+            SessionRow(
+              icon: Icons.flag_outlined,
+              label: 'Status',
+              trailing: AppStatusBadge(
+                label: session.status == AttendanceSessionStatus.checkedOut
+                    ? 'Completed'
+                    : 'Present',
+                background: session.status == AttendanceSessionStatus.checkedOut
+                    ? AppColors.primaryContainer
+                    : AppColors.successContainer,
+                foreground: session.status == AttendanceSessionStatus.checkedOut
+                    ? AppColors.primary
+                    : AppColors.successDark,
+                showDot: true,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SessionRow(
+              icon: Icons.place_outlined,
+              label: 'Location',
+              value: session.location,
+            ),
+          ],
         ],
       ),
     );

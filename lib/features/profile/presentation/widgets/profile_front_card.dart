@@ -52,7 +52,12 @@ class ProfileFrontCard extends StatelessWidget {
             CircleAvatar(
               radius: 50,
               backgroundColor: Colors.grey[200],
-              child: Icon(Icons.person, color: Colors.grey[500], size: 100),
+              backgroundImage: state.imageUrl.isEmpty
+                  ? null
+                  : NetworkImage(state.imageUrl),
+              child: state.imageUrl.isEmpty
+                  ? Icon(Icons.person, color: Colors.grey[500], size: 100)
+                  : null,
             ),
             const SizedBox(height: 8),
 

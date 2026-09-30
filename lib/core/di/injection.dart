@@ -30,10 +30,15 @@ import 'package:first_task_nts/features/login/data/datasources/auth_local_data_s
 import 'package:first_task_nts/features/login/data/datasources/auth_remote_data_source.dart';
 import 'package:first_task_nts/features/login/data/repositories/auth_repository_impl.dart';
 import 'package:first_task_nts/features/login/domain/repository/auth_repository.dart';
+import 'package:first_task_nts/features/login/domain/usecases/clear_auth_token.dart';
 import 'package:first_task_nts/features/login/domain/usecases/request_password_reset.dart';
 import 'package:first_task_nts/features/login/domain/usecases/save_auth_token.dart';
 import 'package:first_task_nts/features/login/domain/usecases/sign_in.dart';
+import 'package:first_task_nts/features/login/domain/usecases/verify_authenticated_account.dart';
 import 'package:first_task_nts/features/login/presentation/cubit/login_cubit.dart';
+import 'package:first_task_nts/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:first_task_nts/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:first_task_nts/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 
 class AppDependencies {
@@ -89,7 +94,17 @@ AppDependencies buildAppDependencies() {
     checkIn: CheckIn(homeRepository),
   );
 
-  final profileCubit = ProfileCubit();
+  final profileRepository = ProfileRepositoryImpl(
+    ProfileRemoteDataSource(),
+  );
+
+  final profileCubit = ProfileCubit(
+    getUserProfile: GetUserProfile(
+      profileRepository,
+      authRepository,
+      GetSavedDatabaseUrl(connectionRepository),
+    ),
+  );
 
   final databaseSetupCubit = DatabaseSetupCubit(
     validateDatabaseUrl: const ValidateDatabaseUrl(),
@@ -103,6 +118,8 @@ AppDependencies buildAppDependencies() {
     requestPasswordReset: RequestPasswordReset(authRepository),
     saveAuthToken: SaveAuthToken(authRepository),
     getSavedDatabaseUrl: GetSavedDatabaseUrl(connectionRepository),
+    verifyAuthenticatedAccount: VerifyAuthenticatedAccount(authRepository),
+    clearAuthToken: ClearAuthToken(authRepository),
   );
 
   return AppDependencies(

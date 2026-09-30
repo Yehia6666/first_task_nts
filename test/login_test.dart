@@ -32,12 +32,16 @@ import 'package:first_task_nts/features/home/domain/usecases/check_in.dart';
 import 'package:first_task_nts/features/home/domain/usecases/get_today_session.dart';
 import 'package:first_task_nts/features/home/presentation/cubit/home_cubit.dart';
 import 'package:first_task_nts/features/login/data/datasources/auth_remote_data_source.dart';
+import 'package:first_task_nts/features/login/data/models/authenticated_user_model.dart';
 import 'package:first_task_nts/features/login/data/models/sign_in_response_model.dart';
 import 'package:first_task_nts/features/login/domain/entities/auth_session.dart';
+import 'package:first_task_nts/features/login/domain/entities/authenticated_user.dart';
 import 'package:first_task_nts/features/login/domain/repository/auth_repository.dart';
+import 'package:first_task_nts/features/login/domain/usecases/clear_auth_token.dart';
 import 'package:first_task_nts/features/login/domain/usecases/request_password_reset.dart';
 import 'package:first_task_nts/features/login/domain/usecases/save_auth_token.dart';
 import 'package:first_task_nts/features/login/domain/usecases/sign_in.dart';
+import 'package:first_task_nts/features/login/domain/usecases/verify_authenticated_account.dart';
 import 'package:first_task_nts/features/login/presentation/cubit/login_cubit.dart';
 import 'package:first_task_nts/features/login/presentation/screens/login_screen.dart';
 import 'package:first_task_nts/features/login/presentation/states/login_state.dart';
@@ -95,6 +99,29 @@ const String _forgotPasswordBody = '''
     "message": "A reset link has been sent to your email address.",
     "code": "success",
     "data": {}
+  }
+}
+''';
+
+const String _currentUserBody = '''
+{
+  "jsonrpc": "2.0",
+  "id": null,
+  "result": {
+    "status": "success",
+    "message": "Account loaded.",
+    "code": "success",
+    "data": {
+      "user": {
+        "id": 7,
+        "name": "Nour El-Sayed",
+        "email": "nour@example.com",
+        "phone": "+02 2 2727008",
+        "role": "Mobile Developer",
+        "is_active": true,
+        "is_email_verified": true
+      }
+    }
   }
 }
 ''';
@@ -292,6 +319,268 @@ void main() {
     });
   });
 
+  group('AuthenticatedUserModel', () {
+    test('reads the account out of a nested profile', () {
+      final AuthenticatedUserModel? user = AuthenticatedUserModel.fromJson(
+        jsonDecode('{"user": {"id": 7, "name": "Nour El-Sayed", "email": "nour@example.com",'
+            ' "phone": "+02 2 2727008", "role": "Mobile Developer", "is_active": true,'
+            ' "is_email_verified": false}}') as Map<String, dynamic>,
+      );
+
+      expect(user, isNotNull);
+      expect(user!.id, 7);
+      expect(user.name, 'Nour El-Sayed');
+      expect(user.email, 'nour@example.com');
+      expect(user.phone, '+02 2 2727008');
+      expect(user.role, 'Mobile Developer');
+      expect(user.isActive, isTrue);
+      expect(user.isEmailVerified, isFalse);
+      expect(user.hasRequiredProfile, isTrue);
+    });
+
+    test('reads a flat payload and a status word', () {
+      final AuthenticatedUserModel? user = AuthenticatedUserModel.fromJson(
+        jsonDecode('{"name": "Nour", "email": "n@e.com", "status": "blocked"}')
+            as Map<String, dynamic>,
+      );
+
+      expect(user, isNotNull);
+      expect(user!.isActive, isFalse);
+    });
+
+    test('gives back null when the required fields are missing', () {
+      expect(
+        AuthenticatedUserModel.fromJson(
+          jsonDecode('{"name": "Nour"}') as Map<String, dynamic>,
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('AuthRemoteDataSource.loadCurrentUser', () {
+    test('reads the account with the token in the authorization header', () async {
+      final (:source, :adapter) = _dataSource((_) => _currentUserBody);
+
+      final AuthenticatedUserModel user =
+          await source.loadCurrentUser(token: 'session-token-123', databaseUrl: url);
+
+      expect(
+        adapter.calls.single.uri.toString(),
+        'https://odoo.example.com/odoo/api/v1/auth/profile',
+      );
+      expect(adapter.calls.single.method, 'GET');
+      expect(
+        adapter.calls.single.headers['Authorization'],
+        'Bearer session-token-123',
+      );
+      expect(adapter.bodies.single, isEmpty, reason: 'the token never goes in the body');
+      expect(user.name, 'Nour El-Sayed');
+      expect(user.email, 'nour@example.com');
+      expect(user.isActive, isTrue);
+    });
+
+    test('reads a flat profile body without the jsonrpc envelope', () async {
+      final (:source, :adapter) = _dataSource(
+        (_) => _json('{"name": "Nour El-Sayed", "email": "nour@example.com", "is_active": true}'),
+      );
+
+      final AuthenticatedUserModel user =
+          await source.loadCurrentUser(token: 'session-token-123', databaseUrl: url);
+
+      expect(user.name, 'Nour El-Sayed');
+      expect(user.email, 'nour@example.com');
+    });
+
+    test('turns a refused token into an account that cannot be used', () async {
+      final (:source, :adapter) = _dataSource(
+        (_) => _json('{"status": "error", "message": "Authentication required"}', status: 401),
+      );
+
+      expect(
+        () => source.loadCurrentUser(token: 'stale', databaseUrl: url),
+        throwsA(
+          isA<AccountRejectedFailure>().having(
+            (AccountRejectedFailure failure) => failure.reason,
+            'reason',
+            AccountRejection.sessionExpired,
+          ),
+        ),
+      );
+    });
+
+    test('turns a forbidden token into an account that cannot be used', () async {
+      final (:source, :adapter) = _dataSource((_) {
+        final ResponseBody body = _json('{"status": "error"}', status: 403);
+        return body;
+      });
+
+      expect(
+        () => source.loadCurrentUser(token: 'stale', databaseUrl: url),
+        throwsA(isA<AccountRejectedFailure>()),
+      );
+    });
+
+    test('names the method instead of blaming the server address on a 405', () async {
+      final (:source, :adapter) = _dataSource((_) => _json('', status: 405));
+
+      expect(
+        () => source.loadCurrentUser(token: 'session-token-123', databaseUrl: url),
+        throwsA(
+          isA<ServerRequestFailure>()
+              .having((ServerRequestFailure f) => f.statusCode, 'statusCode', 405)
+              .having(
+                (ServerRequestFailure f) => f.message,
+                'message',
+                contains('does not accept this request method'),
+              ),
+        ),
+      );
+    });
+
+    test('leaves a server error retryable', () async {
+      final (:source, :adapter) = _dataSource(
+        (_) => _json('{"result": {"status": "error"}}', status: 500),
+      );
+
+      expect(
+        () => source.loadCurrentUser(token: 'session-token-123', databaseUrl: url),
+        throwsA(
+          isA<AppFailure>().having(
+            (AppFailure failure) => failure is AccountRejectedFailure,
+            'is an account rejection',
+            isFalse,
+          ),
+        ),
+      );
+    });
+
+    test('maps an unreachable server to a network failure', () async {
+      final (:source, :adapter) = _dataSource(
+        (_) => throw DioException(
+          requestOptions: RequestOptions(path: 'api/v1/auth/profile'),
+          type: DioExceptionType.connectionError,
+        ),
+      );
+
+      expect(
+        () => source.loadCurrentUser(token: 'session-token-123', databaseUrl: url),
+        throwsA(
+          isA<NetworkFailure>().having(
+            (NetworkFailure failure) => failure.message,
+            'message',
+            contains('No internet connection'),
+          ),
+        ),
+      );
+    });
+
+    test('maps a slow server to a timeout failure', () async {
+      final (:source, :adapter) = _dataSource(
+        (_) => throw DioException(
+          requestOptions: RequestOptions(path: 'api/v1/auth/profile'),
+          type: DioExceptionType.receiveTimeout,
+        ),
+      );
+
+      expect(
+        () => source.loadCurrentUser(token: 'session-token-123', databaseUrl: url),
+        throwsA(
+          isA<TimeoutFailure>().having(
+            (TimeoutFailure failure) => failure.message,
+            'message',
+            'Connection timed out.',
+          ),
+        ),
+      );
+    });
+  });
+
+  group('VerifyAuthenticatedAccount', () {
+    test('passes an active account with the fields the app needs', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository()..savedToken = 'session-token';
+
+      final AuthenticatedUser user = await VerifyAuthenticatedAccount(auth)(
+        databaseUrl: url,
+      );
+
+      expect(user.email, 'nour@example.com');
+      expect(auth.lastVerifiedToken, 'session-token');
+    });
+
+    test('refuses a disabled account', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository(
+        user: const AuthenticatedUser(
+          name: 'Nour El-Sayed',
+          email: 'nour@example.com',
+          isActive: false,
+        ),
+      )..savedToken = 'session-token';
+
+      expect(
+        () => VerifyAuthenticatedAccount(auth)(databaseUrl: url),
+        throwsA(
+          isA<AccountRejectedFailure>().having(
+            (AccountRejectedFailure failure) => failure.reason,
+            'reason',
+            AccountRejection.accountDisabled,
+          ),
+        ),
+      );
+    });
+
+    test('refuses a deleted account', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository(
+        user: const AuthenticatedUser(
+          name: 'Nour El-Sayed',
+          email: 'nour@example.com',
+          isDeleted: true,
+        ),
+      )..savedToken = 'session-token';
+
+      expect(
+        () => VerifyAuthenticatedAccount(auth)(databaseUrl: url),
+        throwsA(
+          isA<AccountRejectedFailure>().having(
+            (AccountRejectedFailure failure) => failure.reason,
+            'reason',
+            AccountRejection.accountDeleted,
+          ),
+        ),
+      );
+    });
+
+    test('refuses an account without a name or an email', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository(
+        user: const AuthenticatedUser(name: '', email: ''),
+      )..savedToken = 'session-token';
+
+      expect(
+        () => VerifyAuthenticatedAccount(auth)(databaseUrl: url),
+        throwsA(
+          isA<AccountRejectedFailure>().having(
+            (AccountRejectedFailure failure) => failure.reason,
+            'reason',
+            AccountRejection.profileIncomplete,
+          ),
+        ),
+      );
+    });
+
+    test('refuses to check anything when no token was stored', () async {
+      expect(
+        () => VerifyAuthenticatedAccount(_FakeAuthRepository())(databaseUrl: url),
+        throwsA(
+          isA<AccountRejectedFailure>().having(
+            (AccountRejectedFailure failure) => failure.reason,
+            'reason',
+            AccountRejection.sessionExpired,
+          ),
+        ),
+      );
+    });
+  });
+
   group('LoginFormValidators', () {
     test('accepts an address and a password, and rejects the rest', () {
       expect(LoginFormValidators.email('nour@example.com'), isNull);
@@ -419,14 +708,101 @@ void main() {
       expect(cubit.state, isA<LoginPasswordResetFailure>());
       expect((cubit.state as LoginPasswordResetFailure).message, isNotEmpty);
     });
+
+    test('verifies the account with the stored token before it succeeds', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository();
+      final LoginCubit cubit = _buildCubit(auth);
+      addTearDown(cubit.close);
+
+      final List<LoginState> seen = <LoginState>[];
+      final Stream<LoginState> states = cubit.stream;
+      final sub = states.listen(seen.add);
+      addTearDown(sub.cancel);
+
+      await cubit.signInWith(email: 'nour@example.com', password: 'secret');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(seen, <Matcher>[
+        isA<LoginSubmitting>(),
+        isA<LoginVerifyingAccount>(),
+        isA<LoginSuccess>(),
+      ]);
+      expect(auth.lastVerifiedToken, 'session-token');
+    });
+
+    test('keeps a disabled account on the form and drops the token', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository(
+        user: const AuthenticatedUser(
+          name: 'Nour El-Sayed',
+          email: 'nour@example.com',
+          isActive: false,
+        ),
+      );
+      final LoginCubit cubit = _buildCubit(auth);
+      addTearDown(cubit.close);
+
+      await cubit.signInWith(email: 'nour@example.com', password: 'secret');
+
+      final LoginAccountRejected state = cubit.state as LoginAccountRejected;
+      expect(state.reason, AccountRejection.accountDisabled);
+      expect(state.message, isNotEmpty);
+      expect(state.canSubmit, isTrue);
+      expect(auth.savedToken, isNull, reason: 'a refused account must not keep its token');
+    });
+
+    test('keeps the token when the check itself failed, so it can be retried', () async {
+      final LoginCubit cubit = _buildCubit(
+        _FakeAuthRepository(verificationFailure: const TimeoutFailure()),
+      );
+      addTearDown(cubit.close);
+
+      await cubit.signInWith(email: 'nour@example.com', password: 'secret');
+
+      expect(cubit.state, isA<LoginVerificationFailed>());
+      expect(cubit.state.canSubmit, isTrue);
+    });
+
+    test('ignores a second tap while the first attempt is still running', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository(
+        verificationFailure: const TimeoutFailure(),
+      );
+      final LoginCubit cubit = _buildCubit(auth);
+      addTearDown(cubit.close);
+
+      final Future<void> first =
+          cubit.signInWith(email: 'nour@example.com', password: 'secret');
+      // The cubit is already submitting, so the second call is dropped outright.
+      await cubit.signInWith(email: 'someone.else@example.com', password: 'other');
+      await first;
+
+      expect(auth.signInCount, 1);
+      expect(auth.lastEmail, 'nour@example.com');
+    });
+
+    test('holds the form busy until the account check comes back', () async {
+      final _FakeAuthRepository auth = _FakeAuthRepository()
+        ..gate = Completer<void>();
+      final LoginCubit cubit = _buildCubit(auth);
+      addTearDown(cubit.close);
+
+      expect(cubit.state.isBusy, isFalse);
+
+      final Future<void> attempt =
+          cubit.signInWith(email: 'nour@example.com', password: 'secret');
+      // The gate keeps the current-user call open, so the checking state stays.
+      await Future<void>.delayed(Duration.zero);
+      expect(cubit.state, isA<LoginVerifyingAccount>());
+      expect(cubit.state.isBusy, isTrue);
+      expect(cubit.state.canSubmit, isFalse);
+
+      auth.gate!.complete();
+      await attempt;
+
+      expect(cubit.state, isA<LoginSuccess>());
+    });
   });
 
   group('LoginScreen', () {
-    final ValidatedDatabase database = ValidatedDatabase(
-      database: 'nts-test',
-      baseUrl: DatabaseUrl.parse('https://saved.example.com'),
-    );
-
     Future<void> pumpLogin(WidgetTester tester, _FakeAuthRepository auth) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1.0;
@@ -438,21 +814,19 @@ void main() {
       await tester.pumpWidget(
         BlocProvider.value(
           value: cubit,
-          child: MaterialApp(home: LoginScreen(database: database)),
+          child: const MaterialApp(home: LoginScreen()),
         ),
       );
       await tester.pump();
     }
 
-    testWidgets('shows the verified server and keeps Sign in off until both fields are filled',
+    testWidgets('asks for the credentials and keeps Sign in off until both fields are filled',
         (tester) async {
       await pumpLogin(tester, _FakeAuthRepository());
 
-      expect(find.text('Sign in'), findsNWidgets(2));
+      expect(find.text('Sign in to Masary'), findsOneWidget);
+      expect(find.widgetWithText(AppButton, 'Sign in'), findsOneWidget);
       expect(find.text('Enter your credentials to continue'), findsOneWidget);
-      expect(find.text('nts-test'), findsOneWidget);
-      expect(find.text('saved.example.com'), findsOneWidget);
-
       expect(
         tester.widget<AppButton>(find.widgetWithText(AppButton, 'Sign in')).enabled,
         isFalse,
@@ -509,7 +883,7 @@ void main() {
             BlocProvider.value(value: homeCubit),
             BlocProvider(create: (_) => AppNavCubit()),
           ],
-          child: MaterialApp(home: LoginScreen(database: database)),
+          child: const MaterialApp(home: LoginScreen()),
         ),
       );
       await tester.pump();
@@ -615,6 +989,81 @@ void main() {
       expect(find.text('Enter a valid email address.'), findsOneWidget);
       expect(auth.lastEmail, isNull, reason: 'nothing may be sent for an invalid address');
     });
+
+    testWidgets('stays on the form and names the reason a disabled account is refused',
+        (tester) async {
+      final _FakeAuthRepository auth = _FakeAuthRepository(
+        user: const AuthenticatedUser(
+          name: 'Nour El-Sayed',
+          email: 'nour@example.com',
+          isActive: false,
+        ),
+      );
+      await pumpLogin(tester, auth);
+
+      await tester.enterText(find.widgetWithText(TextFormField, 'you@company.com'), 'nour@example.com');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Your password'), 'secret');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(AppButton, 'Sign in'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(auth.lastVerifiedToken, 'session-token', reason: 'the stored token is used');
+      expect(find.byType(AppShell), findsNothing);
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(find.text('This account is disabled'), findsOneWidget);
+      expect(auth.savedToken, isNull, reason: 'a refused account must not keep its token');
+    });
+
+    testWidgets('offers the same button as a retry when the check could not finish',
+        (tester) async {
+      final _FakeAuthRepository auth = _FakeAuthRepository(
+        verificationFailure: const TimeoutFailure(),
+      );
+      await pumpLogin(tester, auth);
+
+      await tester.enterText(find.widgetWithText(TextFormField, 'you@company.com'), 'nour@example.com');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Your password'), 'secret');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(AppButton, 'Sign in'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byType(AppShell), findsNothing);
+      expect(find.text('Could not verify your account'), findsOneWidget);
+      expect(
+        tester.widget<AppButton>(find.widgetWithText(AppButton, 'Try again')).enabled,
+        isTrue,
+        reason: 'the retry has to be ready right away',
+      );
+      expect(auth.savedToken, 'session-token', reason: 'a transport problem keeps the token');
+    });
+
+    testWidgets('shows the spinner on the button while the account is checked', (tester) async {
+      final _FakeAuthRepository auth = _FakeAuthRepository()..gate = Completer<void>();
+      await pumpLogin(tester, auth);
+
+      await tester.enterText(find.widgetWithText(TextFormField, 'you@company.com'), 'nour@example.com');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Your password'), 'secret');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(AppButton, 'Sign in'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byType(AppShell), findsNothing, reason: 'navigation waits for the check');
+      // The label is swapped for the spinner, so the button is found by type.
+      final AppButton button = tester.widget<AppButton>(find.byType(AppButton).first);
+      expect(button.loading, isTrue);
+      expect(button.enabled, isFalse);
+      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      expect(
+        tester.widget<TextFormField>(find.byType(TextFormField).first).enabled,
+        isFalse,
+        reason: 'the form is locked while the account is checked',
+      );
+
+      // The check is still open, which is the state this test is about.
+    });
   });
 }
 
@@ -625,19 +1074,33 @@ LoginCubit _buildCubit(_FakeAuthRepository auth, {ConnectionRepository? connecti
       getSavedDatabaseUrl: GetSavedDatabaseUrl(
         connection ?? _FakeConnectionRepository(saved: DatabaseUrl.parse('https://saved.example.com')),
       ),
+      verifyAuthenticatedAccount: VerifyAuthenticatedAccount(auth),
+      clearAuthToken: ClearAuthToken(auth),
     );
 
 /// In-memory stand-in for the authentication backend.
 class _FakeAuthRepository implements AuthRepository {
-  _FakeAuthRepository({this.failure});
+  _FakeAuthRepository({this.failure, this.user, this.verificationFailure});
 
+  /// Thrown by the sign-in call.
   final AppFailure? failure;
+
+  /// The account the current-user call reports.
+  final AuthenticatedUser? user;
+
+  /// Thrown by the current-user call, for transport problems.
+  final AppFailure? verificationFailure;
 
   static const String resetMessage = 'A reset link has been sent to your email address.';
 
   String? savedToken;
   String? lastEmail;
   DatabaseUrl? lastDatabaseUrl;
+  String? lastVerifiedToken;
+  int signInCount = 0;
+
+  /// Set by a test that needs the current-user call to stay open.
+  Completer<void>? gate;
 
   @override
   Future<AuthSession> signIn({
@@ -645,6 +1108,7 @@ class _FakeAuthRepository implements AuthRepository {
     required String password,
     required DatabaseUrl databaseUrl,
   }) async {
+    signInCount++;
     lastEmail = email;
     lastDatabaseUrl = databaseUrl;
 
@@ -652,6 +1116,27 @@ class _FakeAuthRepository implements AuthRepository {
     if (failure != null) throw failure;
 
     return const AuthSession(token: 'session-token', userName: 'Nour El-Sayed');
+  }
+
+  @override
+  Future<AuthenticatedUser> loadCurrentUser({
+    required String token,
+    required DatabaseUrl databaseUrl,
+  }) async {
+    lastVerifiedToken = token;
+    lastDatabaseUrl = databaseUrl;
+
+    await gate?.future;
+
+    final AppFailure? failure = verificationFailure;
+    if (failure != null) throw failure;
+
+    return user ??
+        const AuthenticatedUser(
+          name: 'Nour El-Sayed',
+          email: 'nour@example.com',
+          isActive: true,
+        );
   }
 
   @override

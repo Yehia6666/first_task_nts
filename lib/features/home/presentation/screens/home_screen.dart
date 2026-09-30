@@ -7,11 +7,15 @@ import '../../../../core/utils/app_responsive.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/widgets/app_state_views.dart';
 import '../../../attendance/presentation/screens/attendance_logs_screen.dart';
+import '../../domain/entities/attendance_session.dart';
 import '../cubit/home_cubit.dart';
 import '../states/home_state.dart';
-import '../widgets/home_check_in_card.dart';
+import '../widgets/home_check_in_button.dart';
+import '../widgets/home_check_in_header.dart';
+import '../widgets/home_elapsed_progress_bar.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_session_card.dart';
+import '../widgets/home_time_summary.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -86,15 +90,22 @@ class HomeScreen extends StatelessWidget {
                 AppSpacing.xxl,
               ),
               children: [
-                HomeCheckInCard(
-                  session: state.session,
+                HomeCheckInHeader(
+                  status: state.session.status,
                   currentTime: state.currentTime,
-                  progress: state.progress,
-                  isCheckingIn: state.isCheckingIn,
-                  onCheckIn: () =>
-                      context.read<HomeCubit>().onCheckInPressed(),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.xxl),
+                HomeTimeSummary(session: state.session, progress: state.progress),
+                const SizedBox(height: AppSpacing.lg),
+                HomeElapsedProgressBar(progress: state.progress),
+                const SizedBox(height: AppSpacing.xxl),
+                HomeCheckInButton(
+                  isLoading: state.isCheckingIn,
+                  isCheckedIn:
+                      state.session.status != AttendanceSessionStatus.notCheckedIn,
+                  onPressed: () => context.read<HomeCubit>().onCheckInPressed(),
+                ),
+                const SizedBox(height: AppSpacing.xxl),
                 HomeSessionCard(
                   session: state.session,
                   onLogHistory: () => _openAttendanceLogs(context),

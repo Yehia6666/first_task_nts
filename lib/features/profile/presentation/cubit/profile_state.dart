@@ -23,6 +23,7 @@ final class ProfileSuccess extends ProfileState {
     required this.company,
     required this.department,
     required this.employeeId,
+    this.imageUrl = '',
     this.isCardFlipped = false,
   });
 
@@ -32,6 +33,7 @@ final class ProfileSuccess extends ProfileState {
   final String company;
   final String department;
   final String employeeId;
+  final String imageUrl;
   final bool isCardFlipped;
 
   ProfileSuccess copyWith({bool? isCardFlipped}) {
@@ -42,6 +44,7 @@ final class ProfileSuccess extends ProfileState {
       company: company,
       department: department,
       employeeId: employeeId,
+      imageUrl: imageUrl,
       isCardFlipped: isCardFlipped ?? this.isCardFlipped,
     );
   }
@@ -54,6 +57,7 @@ final class ProfileSuccess extends ProfileState {
         company,
         department,
         employeeId,
+        imageUrl,
         isCardFlipped,
       ];
 }

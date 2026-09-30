@@ -9,10 +9,12 @@ class LoginErrorBanner extends StatelessWidget {
   const LoginErrorBanner({
     super.key,
     required this.message,
-    this.title = 'Could not sign in',
+    this.title,
   });
 
-  final String title;
+  static const String _defaultTitle = 'Could not sign in';
+
+  final String? title;
   final String message;
 
   @override
@@ -34,7 +36,7 @@ class LoginErrorBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  title ?? _defaultTitle,
                   style: AppTextStyles.titleMedium.copyWith(
                     fontSize: 17,
                     color: AppColors.error,

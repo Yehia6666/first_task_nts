@@ -12,7 +12,7 @@ class LoginHeader extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Sign in',
+          'Sign in to Masary',
           textAlign: TextAlign.center,
           style: AppTextStyles.headline.copyWith(
             fontSize: 30,
