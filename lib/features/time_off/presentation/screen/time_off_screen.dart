@@ -27,6 +27,7 @@ class TimeOffScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: TabBar(
+                isScrollable: true,
                 dividerHeight: 0,
                 indicatorPadding: EdgeInsetsGeometry.symmetric(
                   horizontal: -12,

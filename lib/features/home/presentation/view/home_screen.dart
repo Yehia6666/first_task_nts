@@ -5,8 +5,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/app_responsive.dart';
 import '../../../../core/widgets/app_drawer.dart';
-import '../../../../core/widgets/app_state_views.dart';
-import '../../../attendance/presentation/screens/attendance_logs_screen.dart';
+import '../../../../core/widgets/app_nav_scope.dart';
+import '../../../../core/widgets/app_error_state.dart';
+import '../../../../core/widgets/app_loading_state.dart';
 import '../manager/home_cubit/home_cubit.dart';
 import '../widgets/home_check_in_card.dart';
 import '../widgets/home_header.dart';
@@ -18,11 +19,7 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   void _openAttendanceLogs(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const AttendanceLogsScreen(),
-      ),
-    );
+    AppNavScope.of(context).goBranch(4);
   }
 
   @override

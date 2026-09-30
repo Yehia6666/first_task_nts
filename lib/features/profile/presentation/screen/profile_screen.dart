@@ -4,6 +4,7 @@ import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit
 import 'package:first_task_nts/features/profile/presentation/widgets/profile_screen_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -18,9 +19,7 @@ class ProfileScreen extends StatelessWidget {
           title: Text("Profile", style: AppTextStyles.titleLarge),
           leading: IconButton(
             padding: EdgeInsets.zero,
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => context.pop(),
             icon: Icon(Icons.arrow_back),
           ),
         ),

@@ -1,70 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_radius.dart';
 import '../constants/app_spacing.dart';
-import '../navigation/app_nav_cubit.dart';
-import '../theme/app_text_styles.dart';
+import 'app_drawer_item.dart';
 import 'app_logo.dart';
+import 'app_nav_scope.dart';
 
-/// Drawer entry: which destination it navigates to plus its icon and label.
-class _DrawerEntry {
-  const _DrawerEntry({
-    required this.destination,
+/// Drawer entry: which branch it navigates to plus its icon and label. The
+/// branch index matches the [StatefulShellRoute] branch order.
+class DrawerEntry {
+  const DrawerEntry({
+    required this.index,
     required this.icon,
     required this.label,
   });
 
-  final AppDestination destination;
+  final int index;
   final IconData icon;
   final String label;
 }
 
-const List<_DrawerEntry> _entries = [
-  _DrawerEntry(
-    destination: AppDestination.home,
-    icon: Icons.home_outlined,
-    label: 'Home',
-  ),
-  _DrawerEntry(
-    destination: AppDestination.timeOff,
-    icon: Icons.event_note_outlined,
-    label: 'Time Off',
-  ),
-  _DrawerEntry(
-    destination: AppDestination.payroll,
+const List<DrawerEntry> _entries = [
+  DrawerEntry(index: 0, icon: Icons.home_outlined, label: 'Home'),
+  DrawerEntry(index: 1, icon: Icons.event_note_outlined, label: 'Time Off'),
+  DrawerEntry(
+    index: 2,
     icon: Icons.account_balance_wallet_outlined,
     label: 'Payroll',
   ),
-  _DrawerEntry(
-    destination: AppDestination.expense,
-    icon: Icons.receipt_long_outlined,
-    label: 'Expense',
-  ),
-  _DrawerEntry(
-    destination: AppDestination.attendance,
+  DrawerEntry(index: 3, icon: Icons.receipt_long_outlined, label: 'Expense'),
+  DrawerEntry(
+    index: 4,
     icon: Icons.calendar_month_outlined,
     label: 'Attendance',
   ),
-  _DrawerEntry(
-    destination: AppDestination.settings,
-    icon: Icons.settings_outlined,
-    label: 'Settings',
-  ),
+  DrawerEntry(index: 5, icon: Icons.settings_outlined, label: 'Settings'),
 ];
 
 /// Application drawer opened from any screen with a menu/hamburger button
-/// (Home, Expenses). The selected item reflects [AppNavCubit], so it always
-/// matches the current destination, and tapping an item simply delegates
-/// navigation to the cubit.
+/// (Home, Expenses). The selected item reflects the active [StatefulShellRoute]
+/// branch, and tapping an item delegates navigation to the shell via
+/// [AppNavScope].
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     final width = (MediaQuery.sizeOf(context).width * 0.75).clamp(0.0, 360.0);
-    final destination = context.watch<AppNavCubit>().state;
+    final scope = AppNavScope.of(context);
+    final currentIndex = scope.navigationShell.currentIndex;
 
     return Drawer(
       width: width,
@@ -94,11 +79,12 @@ class AppDrawer extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   children: [
                     for (final entry in _entries)
-                      _DrawerItem(
-                        entry: entry,
-                        selected: destination == entry.destination,
+                      AppDrawerItem(
+                        icon: entry.icon,
+                        label: entry.label,
+                        selected: currentIndex == entry.index,
                         onTap: () {
-                          context.read<AppNavCubit>().select(entry.destination);
+                          scope.goBranch(entry.index);
                           Navigator.of(context).pop();
                         },
                       ),
@@ -106,56 +92,6 @@ class AppDrawer extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DrawerItem extends StatelessWidget {
-  const _DrawerItem({
-    required this.entry,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final _DrawerEntry entry;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color color = selected ? AppColors.primary : AppColors.textMuted;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Material(
-        color: selected ? AppColors.primaryContainer : Colors.transparent,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.md,
-            ),
-            child: Row(
-              children: [
-                Icon(entry.icon, size: 22, color: color),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    entry.label,
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: color,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

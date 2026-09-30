@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/app_responsive.dart';
+import '../../../../core/utils/app_router.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/widgets/app_floating_action_button.dart';
-import '../../../../core/widgets/app_state_views.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/entities/expense_tab.dart';
 import '../cubit/expenses_cubit.dart';
 import '../states/expenses_state.dart';
-import '../widgets/expense_card.dart';
+import '../widgets/expense_list_content.dart';
 import '../widgets/expense_search_field.dart';
 import '../widgets/expense_section_header.dart';
 import '../widgets/expense_summary_card.dart';
 import '../widgets/expense_tabs.dart';
 import '../widgets/expenses_header.dart';
-import 'expense_details_screen.dart';
 
 /// Mobile-first Expenses screen. Header, summary cards, search, tabs and a
 /// vertical expense list, all driven by [ExpensesCubit].
@@ -45,11 +45,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   void _openDetails(BuildContext context, Expense expense) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ExpenseDetailsScreen(expense: expense),
-      ),
-    );
+    context.push(AppRouter.expenseDetails, extra: expense);
   }
 
   @override
@@ -127,7 +123,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Expanded(child: _buildContent(state)),
+                    Expanded(
+                      child: ExpenseListContent(
+                        onOpenDetails: (expense) =>
+                            _openDetails(context, expense),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -136,43 +137,5 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildContent(ExpensesState state) {
-    return switch (state) {
-      ExpensesInitial() || ExpensesLoading() => const AppLoadingState(
-          message: 'Loading expenses…',
-        ),
-      ExpensesError() => AppErrorState(
-          message: state.message,
-          onRetry: () => context.read<ExpensesCubit>().load(),
-        ),
-      ExpensesLoaded() => state.expenses.isEmpty
-          ? const AppEmptyState(
-              icon: Icons.receipt_long_outlined,
-              title: 'No expenses found',
-              message: 'Try a different search or tab.',
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-              itemCount: state.expenses.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-              itemBuilder: (context, index) {
-                final expense = state.expenses[index];
-                return Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppResponsive.pagePadding(context),
-                  ),
-                  child: ExpenseCard(
-                    expense: expense,
-                    selected: state.selectedIds.contains(expense.id),
-                    onSelected: () =>
-                        context.read<ExpensesCubit>().toggleSelection(expense.id),
-                    onTap: () => _openDetails(context, expense),
-                  ),
-                );
-              },
-            ),
-    };
   }
 }

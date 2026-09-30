@@ -1,10 +1,12 @@
+import 'package:first_task_nts/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:first_task_nts/app.dart';
 import 'package:first_task_nts/core/constants/app_colors.dart';
 import 'package:first_task_nts/core/constants/app_radius.dart';
+import 'package:first_task_nts/core/di/injection_container.dart';
+import 'package:first_task_nts/core/utils/app_router.dart';
 import 'package:first_task_nts/core/widgets/app_bottom_navigation.dart';
 import 'package:first_task_nts/core/widgets/app_search_field.dart';
 import 'package:first_task_nts/features/attendance/data/datasources/attendance_local_data_source.dart';
@@ -24,7 +26,6 @@ import 'package:first_task_nts/features/home/data/repo/home_repo_imp.dart';
 import 'package:first_task_nts/features/home/domain/use_cases/check_in_use_case.dart';
 import 'package:first_task_nts/features/home/domain/use_cases/get_today_session_use_case.dart';
 import 'package:first_task_nts/features/home/presentation/manager/home_cubit/home_cubit.dart';
-import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 
 AttendanceCubit buildAttendanceCubit() => AttendanceCubit(
       getAttendanceLogs: GetAttendanceLogs(
@@ -49,31 +50,7 @@ HomeCubit buildHomeCubit() {
   );
 }
 
-NtsApp buildApp({
-  AttendanceCubit? attendanceCubit,
-  ExpensesCubit? expensesCubit,
-  HomeCubit? homeCubit,
-  ProfileCubit? profileCubit,
-}) {
-  return NtsApp(
-    attendanceCubit: attendanceCubit ?? buildAttendanceCubit(),
-    expensesCubit: expensesCubit ?? buildExpensesCubit(),
-    homeCubit: homeCubit ?? buildHomeCubit(),
-    profileCubit: profileCubit ?? ProfileCubit(),
-  );
-}
-
-/// Home runs a live clock timer, so every test must close the cubits before
-/// the test body ends (flutter_test checks for pending timers on completion).
-Future<void> closeCubits(
-  AttendanceCubit attendance,
-  ExpensesCubit expenses,
-  HomeCubit home,
-) async {
-  await home.close();
-  await attendance.close();
-  await expenses.close();
-}
+NtsApp buildApp() => const NtsApp();
 
 /// Renders the app on a phone-sized surface matching the mobile reference.
 void usePhoneSurface(WidgetTester tester) {
@@ -109,6 +86,12 @@ bool navItemHasActiveBackground(WidgetTester tester, String label) {
 }
 
 void main() {
+  setUp(() async {
+    AppRouter.router.go(AppRouter.home);
+    await resetServiceLocator();
+    await setupServiceLocator();
+  });
+
   testWidgets('Attendance Logs screen loads sections from static data', (tester) async {
     final cubit = buildAttendanceCubit();
     addTearDown(cubit.close);
@@ -201,15 +184,7 @@ void main() {
 
   testWidgets('Home screen loads the check-in card and session card', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
 
     // Home is the initial tab; let the static data source finish.
     await tester.pump(const Duration(milliseconds: 600));
@@ -230,21 +205,11 @@ void main() {
       find.textContaining(RegExp(r'^\d{2}:\d{2}:\d{2} (AM|PM)$')),
       findsOneWidget,
     );
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('One Tap Check In updates the session through the Cubit', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     await tester.tap(find.text('One Tap Check In'));
@@ -261,21 +226,11 @@ void main() {
     // Let the snackbar dismiss timer finish so no timers stay pending.
     await tester.pump(const Duration(seconds: 5));
     await tester.pump(const Duration(milliseconds: 400));
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Hamburger button opens the application drawer', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     await tester.tap(find.byTooltip('Open menu'));
@@ -300,21 +255,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byType(Drawer), findsNothing);
     expect(find.text('Payroll'), findsWidgets);
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Drawer selection stays synchronized with the current destination', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     Future<void> openDrawer() async {
@@ -343,21 +288,11 @@ void main() {
     for (final label in ['Time Off', 'Payroll', 'Expense', 'Attendance', 'Settings']) {
       expect(drawerItemColor(tester, label), Colors.transparent);
     }
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Drawer Attendance item opens the attendance screen', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     await tester.tap(find.byTooltip('Open menu'));
@@ -383,21 +318,11 @@ void main() {
       expect(navItemHasActiveBackground(tester, label), isFalse,
           reason: '$label must not be highlighted while Attendance is active');
     }
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('LOG HISTORY navigates to the attendance logs screen', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     await tester.tap(find.text('LOG HISTORY'));
@@ -413,20 +338,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('Attendance Logs'), findsNothing);
     expect(find.text('Ready to Start?'), findsOneWidget);
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Expenses screen loads summary cards and expense list', (tester) async {
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
 
     // Navigate to the Expense tab.
     await tester.pump(const Duration(milliseconds: 600));
@@ -462,20 +377,10 @@ void main() {
 
     // Bottom navigation active item.
     expect(find.text('Expense'), findsWidgets);
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Tapping an expense card opens its details screen', (tester) async {
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     // Navigate to the Expense tab, then open the first expense.
@@ -490,21 +395,11 @@ void main() {
     expect(find.text('Card'), findsOneWidget);
     expect(find.text('RCP-2026-0831'), findsOneWidget);
     expect(find.textContaining('weekly sync'), findsOneWidget);
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Bottom navigation switches between destinations', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     // Home is the selected destination initially.
@@ -518,21 +413,11 @@ void main() {
     await tester.tap(find.text('Home'));
     await tester.pump();
     expect(find.text('Ready to Start?'), findsOneWidget);
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Bottom navigation active visual state moves with the selection', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     BoxDecoration itemDecoration(String label) => tester.widget<Container>(
@@ -580,21 +465,11 @@ void main() {
         }
       }
     }
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Drawer opens from the Expenses screen', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     // Go to the Expenses destination, then open its drawer via the menu button.
@@ -621,21 +496,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byType(Drawer), findsNothing);
     expect(find.text('Ready to Start?'), findsOneWidget);
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 
   testWidgets('Attendance back button returns to the previous destination', (tester) async {
     usePhoneSurface(tester);
-    final attendanceCubit = buildAttendanceCubit();
-    final expensesCubit = buildExpensesCubit();
-    final homeCubit = buildHomeCubit();
-
-    await tester.pumpWidget(buildApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-    ));
+    await tester.pumpWidget(buildApp());
     await tester.pump(const Duration(milliseconds: 600));
 
     // Expense → Attendance via the drawer, then Back returns to Expense.
@@ -658,7 +523,5 @@ void main() {
     expect(find.text('Attendance Logs'), findsNothing);
     expect(find.text('Expenses'), findsOneWidget);
     expect(navItemHasActiveBackground(tester, 'Expense'), isTrue);
-
-    await closeCubits(attendanceCubit, expensesCubit, homeCubit);
   });
 }

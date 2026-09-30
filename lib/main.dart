@@ -1,62 +1,65 @@
+import 'package:first_task_nts/core/di/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:first_task_nts/core/theme/app_theme.dart';
+import 'package:first_task_nts/core/utils/app_router.dart';
+import 'package:first_task_nts/features/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:first_task_nts/features/expenses/presentation/cubit/expenses_cubit.dart';
+import 'package:first_task_nts/features/home/presentation/manager/home_cubit/home_cubit.dart';
+import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'app.dart';
-import 'features/attendance/data/datasources/attendance_local_data_source.dart';
-import 'features/attendance/data/repositories/attendance_repository_impl.dart';
-import 'features/attendance/domain/repository/attendance_repository.dart';
-import 'features/attendance/domain/usecases/filter_attendance_logs.dart';
-import 'features/attendance/domain/usecases/get_attendance_logs.dart';
-import 'features/attendance/presentation/cubit/attendance_cubit.dart';
-import 'features/expenses/data/datasources/expense_local_data_source.dart';
-import 'features/expenses/data/repositories/expense_repository_impl.dart';
-import 'features/expenses/domain/repository/expense_repository.dart';
-import 'features/expenses/domain/usecases/filter_expenses.dart';
-import 'features/expenses/domain/usecases/get_expenses.dart';
-import 'features/expenses/domain/usecases/summarize_expenses.dart';
-import 'features/expenses/presentation/cubit/expenses_cubit.dart';
-import 'features/home/data/data_source/home_local_data_source.dart';
-import 'features/home/data/repo/home_repo_imp.dart';
-import 'features/home/domain/repos/home_repo.dart';
-import 'features/home/domain/use_cases/check_in_use_case.dart';
-import 'features/home/domain/use_cases/get_today_session_use_case.dart';
-import 'features/home/presentation/manager/home_cubit/home_cubit.dart';
-import 'features/profile/presentation/cubit/profile_cubit.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupServiceLocator();
+  runApp(const NtsApp());
+}
 
-void main() {
-  final AttendanceRepository attendanceRepository = AttendanceRepositoryImpl(
-    AttendanceLocalDataSource(),
-  );
-  final ExpenseRepository expenseRepository = ExpenseRepositoryImpl(
-    ExpenseLocalDataSource(),
-  );
-  final HomeRepo homeRepo = HomeRepoImp(
-    HomeLocalDataSource(),
-  );
+class NtsApp extends StatefulWidget {
+  const NtsApp({super.key});
 
-  final attendanceCubit = AttendanceCubit(
-    getAttendanceLogs: GetAttendanceLogs(attendanceRepository),
-    filterAttendanceLogs: const FilterAttendanceLogs(),
-  );
+  @override
+  State<NtsApp> createState() => _NtsAppState();
+}
 
-  final expensesCubit = ExpensesCubit(
-    getExpenses: GetExpenses(expenseRepository),
-    filterExpenses: const FilterExpenses(),
-    summarizeExpenses: const SummarizeExpenses(),
-  );
+class _NtsAppState extends State<NtsApp> {
+  late final AttendanceCubit _attendanceCubit;
+  late final ExpensesCubit _expensesCubit;
+  late final HomeCubit _homeCubit;
+  late final ProfileCubit _profileCubit;
 
-  final homeCubit = HomeCubit(
-    getTodaySession: GetTodaySessionUseCase(homeRepo),
-    checkIn: CheckInUseCase(homeRepo),
-  );
+  @override
+  void initState() {
+    super.initState();
+    _attendanceCubit = getIt<AttendanceCubit>();
+    _expensesCubit = getIt<ExpensesCubit>();
+    _homeCubit = getIt<HomeCubit>();
+    _profileCubit = getIt<ProfileCubit>();
+  }
 
-  final profileCubit = ProfileCubit();
+  @override
+  void dispose() {
+    _attendanceCubit.close();
+    _expensesCubit.close();
+    _homeCubit.close();
+    _profileCubit.close();
+    super.dispose();
+  }
 
-  runApp(
-    NtsApp(
-      attendanceCubit: attendanceCubit,
-      expensesCubit: expensesCubit,
-      homeCubit: homeCubit,
-      profileCubit: profileCubit,
-    ),
-  );
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _attendanceCubit),
+        BlocProvider.value(value: _expensesCubit),
+        BlocProvider.value(value: _homeCubit),
+        BlocProvider.value(value: _profileCubit),
+      ],
+      child: MaterialApp.router(
+        title: 'NTS App',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        routerConfig: AppRouter.router,
+      ),
+    );
+  }
 }
