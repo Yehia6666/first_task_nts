@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+
+import '../../../../core/errors/failure.dart';
 import '../../domain/entities/attendance_session.dart';
 import '../../domain/repos/home_repo.dart';
 import '../data_source/home_local_data_source.dart';
@@ -10,14 +13,26 @@ class HomeRepoImp implements HomeRepo {
   final HomeLocalDataSource _dataSource;
 
   @override
-  Future<AttendanceSession> getTodaySession() async {
-    final model = await _dataSource.getTodaySession();
-    return model.toEntity();
+  Future<Either<Failure, AttendanceSession>> getTodaySession() async {
+    try {
+      final model = await _dataSource.getTodaySession();
+      return Right(model.toEntity());
+    } catch (_) {
+      return const Left(
+        CacheFailure('We could not load your session. Please try again.'),
+      );
+    }
   }
 
   @override
-  Future<AttendanceSession> checkIn(DateTime now) async {
-    final model = await _dataSource.checkIn(now);
-    return model.toEntity();
+  Future<Either<Failure, AttendanceSession>> checkIn(DateTime now) async {
+    try {
+      final model = await _dataSource.checkIn(now);
+      return Right(model.toEntity());
+    } catch (_) {
+      return const Left(
+        CacheFailure('We could not check you in. Please try again.'),
+      );
+    }
   }
 }

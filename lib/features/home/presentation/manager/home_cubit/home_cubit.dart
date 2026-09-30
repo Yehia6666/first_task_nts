@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/use_case/use_case.dart';
 import '../../../../../core/utils/app_formatters.dart';
 import '../../../domain/entities/attendance_session.dart';
 import '../../../domain/use_cases/check_in_use_case.dart';
@@ -29,13 +30,15 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> load() async {
     emit(const HomeLoading());
-    try {
-      _session = await getTodaySession();
-      _startClock();
-      _emitLoaded();
-    } catch (_) {
-      emit(const HomeFailure('We could not load your session. Please try again.'));
-    }
+    final result = await getTodaySession(const NoParams());
+    result.fold(
+      (failure) => emit(HomeFailure(failure.message)),
+      (session) {
+        _session = session;
+        _startClock();
+        _emitLoaded();
+      },
+    );
   }
 
   void _startClock() {
@@ -68,22 +71,26 @@ class HomeCubit extends Cubit<HomeState> {
 
     _isCheckingIn = true;
     _emitLoaded();
-    try {
-      final now = DateTime.now();
-      _session = await checkIn(now);
-      _isCheckingIn = false;
-      emit(HomeSuccess(
-        session: _session!,
-        currentTime: DateTime.now(),
-        progress: _session!.progressAt(DateTime.now()),
-        isCheckingIn: false,
-        feedback: 'Checked in at ${AppFormatters.timeOfDayWithSeconds(now)}',
-      ));
-    } catch (_) {
-      _isCheckingIn = false;
-      _emitLoaded();
-      emit(const HomeFailure('We could not check you in. Please try again.'));
-    }
+    final now = DateTime.now();
+    final result = await checkIn(now);
+    result.fold(
+      (failure) {
+        _isCheckingIn = false;
+        _emitLoaded();
+        emit(HomeFailure(failure.message));
+      },
+      (updatedSession) {
+        _session = updatedSession;
+        _isCheckingIn = false;
+        emit(HomeSuccess(
+          session: _session!,
+          currentTime: DateTime.now(),
+          progress: _session!.progressAt(DateTime.now()),
+          isCheckingIn: false,
+          feedback: 'Checked in at ${AppFormatters.timeOfDayWithSeconds(now)}',
+        ));
+      },
+    );
   }
 
   @override
