@@ -39,6 +39,8 @@ dependencies:
   flutter_svg: ^2.3.0
   table_calendar: ^3.2.1
   shimmer: ^3.0.0
+  dartz: ^0.10.1
+  get_it: ^8.0.3
 
 dev_dependencies:
   flutter_test:
