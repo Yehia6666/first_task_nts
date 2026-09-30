@@ -1,12 +1,14 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/utils/app_formatters.dart';
-import '../../domain/entities/attendance_session.dart';
-import '../../domain/usecases/check_in.dart';
-import '../../domain/usecases/get_today_session.dart';
-import '../states/home_state.dart';
+import '../../../../../core/utils/app_formatters.dart';
+import '../../../domain/entities/attendance_session.dart';
+import '../../../domain/use_cases/check_in_use_case.dart';
+import '../../../domain/use_cases/get_today_session_use_case.dart';
+
+part 'home_state.dart';
 
 /// Holds Home screen state, delegates business logic to use cases, and emits
 /// states the UI renders. Contains no layout/widget code.
@@ -18,8 +20,8 @@ class HomeCubit extends Cubit<HomeState> {
     load();
   }
 
-  final GetTodaySession getTodaySession;
-  final CheckIn checkIn;
+  final GetTodaySessionUseCase getTodaySession;
+  final CheckInUseCase checkIn;
 
   AttendanceSession? _session;
   Timer? _clock;
@@ -32,7 +34,7 @@ class HomeCubit extends Cubit<HomeState> {
       _startClock();
       _emitLoaded();
     } catch (_) {
-      emit(const HomeError('We could not load your session. Please try again.'));
+      emit(const HomeFailure('We could not load your session. Please try again.'));
     }
   }
 
@@ -48,7 +50,7 @@ class HomeCubit extends Cubit<HomeState> {
     final session = _session;
     if (session == null) return;
     final now = DateTime.now();
-    emit(HomeLoaded(
+    emit(HomeSuccess(
       session: session,
       currentTime: now,
       progress: session.progressAt(now),
@@ -70,7 +72,7 @@ class HomeCubit extends Cubit<HomeState> {
       final now = DateTime.now();
       _session = await checkIn(now);
       _isCheckingIn = false;
-      emit(HomeLoaded(
+      emit(HomeSuccess(
         session: _session!,
         currentTime: DateTime.now(),
         progress: _session!.progressAt(DateTime.now()),
@@ -80,7 +82,7 @@ class HomeCubit extends Cubit<HomeState> {
     } catch (_) {
       _isCheckingIn = false;
       _emitLoaded();
-      emit(const HomeError('We could not check you in. Please try again.'));
+      emit(const HomeFailure('We could not check you in. Please try again.'));
     }
   }
 

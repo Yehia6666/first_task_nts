@@ -8,7 +8,7 @@ import 'core/widgets/app_bottom_navigation.dart';
 import 'core/widgets/app_placeholder_screen.dart';
 import 'features/attendance/presentation/screens/attendance_logs_screen.dart';
 import 'features/expenses/presentation/screens/expenses_screen.dart';
-import 'features/home/presentation/screens/home_screen.dart';
+import 'features/home/presentation/view/home_screen.dart';
 
 /// App-level navigation shell. Owns the destination stack and the bottom
 /// navigation bar; both read the current destination from [AppNavCubit], which

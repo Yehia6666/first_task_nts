@@ -7,8 +7,7 @@ import '../../../../core/utils/app_responsive.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/widgets/app_state_views.dart';
 import '../../../attendance/presentation/screens/attendance_logs_screen.dart';
-import '../cubit/home_cubit.dart';
-import '../states/home_state.dart';
+import '../manager/home_cubit/home_cubit.dart';
 import '../widgets/home_check_in_card.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_session_card.dart';
@@ -37,9 +36,9 @@ class HomeScreen extends StatelessWidget {
         child: Builder(
           builder: (scaffoldContext) => BlocListener<HomeCubit, HomeState>(
             listenWhen: (previous, current) =>
-                current is HomeLoaded && current.feedback != null,
+                current is HomeSuccess && current.feedback != null,
             listener: (context, state) {
-              if (state is HomeLoaded && state.feedback != null) {
+              if (state is HomeSuccess && state.feedback != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(state.feedback!)),
                 );
@@ -76,11 +75,11 @@ class HomeScreen extends StatelessWidget {
           HomeInitial() || HomeLoading() => const AppLoadingState(
               message: 'Loading your session…',
             ),
-          HomeError() => AppErrorState(
+          HomeFailure() => AppErrorState(
               message: state.message,
               onRetry: () => context.read<HomeCubit>().load(),
             ),
-          HomeLoaded() => ListView(
+          HomeSuccess() => ListView(
               padding: EdgeInsets.fromLTRB(
                 AppResponsive.pagePadding(context),
                 AppSpacing.xl,

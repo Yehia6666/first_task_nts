@@ -19,11 +19,11 @@ import 'package:first_task_nts/features/expenses/domain/usecases/filter_expenses
 import 'package:first_task_nts/features/expenses/domain/usecases/get_expenses.dart';
 import 'package:first_task_nts/features/expenses/domain/usecases/summarize_expenses.dart';
 import 'package:first_task_nts/features/expenses/presentation/cubit/expenses_cubit.dart';
-import 'package:first_task_nts/features/home/data/datasources/home_local_data_source.dart';
-import 'package:first_task_nts/features/home/data/repositories/home_repository_impl.dart';
-import 'package:first_task_nts/features/home/domain/usecases/check_in.dart';
-import 'package:first_task_nts/features/home/domain/usecases/get_today_session.dart';
-import 'package:first_task_nts/features/home/presentation/cubit/home_cubit.dart';
+import 'package:first_task_nts/features/home/data/data_source/home_local_data_source.dart';
+import 'package:first_task_nts/features/home/data/repo/home_repo_imp.dart';
+import 'package:first_task_nts/features/home/domain/use_cases/check_in_use_case.dart';
+import 'package:first_task_nts/features/home/domain/use_cases/get_today_session_use_case.dart';
+import 'package:first_task_nts/features/home/presentation/manager/home_cubit/home_cubit.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 
 AttendanceCubit buildAttendanceCubit() => AttendanceCubit(
@@ -44,8 +44,8 @@ ExpensesCubit buildExpensesCubit() => ExpensesCubit(
 HomeCubit buildHomeCubit() {
   final source = HomeLocalDataSource();
   return HomeCubit(
-    getTodaySession: GetTodaySession(HomeRepositoryImpl(source)),
-    checkIn: CheckIn(HomeRepositoryImpl(source)),
+    getTodaySession: GetTodaySessionUseCase(HomeRepoImp(source)),
+    checkIn: CheckInUseCase(HomeRepoImp(source)),
   );
 }
 

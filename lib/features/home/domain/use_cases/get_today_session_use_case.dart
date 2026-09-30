@@ -1,11 +1,11 @@
 import '../entities/attendance_session.dart';
-import '../repository/home_repository.dart';
+import '../repos/home_repo.dart';
 
 /// Loads the current attendance session through the repository abstraction.
-class GetTodaySession {
-  const GetTodaySession(this._repository);
+class GetTodaySessionUseCase {
+  const GetTodaySessionUseCase(this._repository);
 
-  final HomeRepository _repository;
+  final HomeRepo _repository;
 
   Future<AttendanceSession> call() => _repository.getTodaySession();
 }

@@ -9,7 +9,7 @@ import 'core/navigation/app_nav_cubit.dart';
 import 'core/theme/app_theme.dart';
 import 'features/attendance/presentation/cubit/attendance_cubit.dart';
 import 'features/expenses/presentation/cubit/expenses_cubit.dart';
-import 'features/home/presentation/cubit/home_cubit.dart';
+import 'features/home/presentation/manager/home_cubit/home_cubit.dart';
 
 class NtsApp extends StatelessWidget {
   const NtsApp({

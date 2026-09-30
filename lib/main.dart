@@ -14,12 +14,12 @@ import 'features/expenses/domain/usecases/filter_expenses.dart';
 import 'features/expenses/domain/usecases/get_expenses.dart';
 import 'features/expenses/domain/usecases/summarize_expenses.dart';
 import 'features/expenses/presentation/cubit/expenses_cubit.dart';
-import 'features/home/data/datasources/home_local_data_source.dart';
-import 'features/home/data/repositories/home_repository_impl.dart';
-import 'features/home/domain/repository/home_repository.dart';
-import 'features/home/domain/usecases/check_in.dart';
-import 'features/home/domain/usecases/get_today_session.dart';
-import 'features/home/presentation/cubit/home_cubit.dart';
+import 'features/home/data/data_source/home_local_data_source.dart';
+import 'features/home/data/repo/home_repo_imp.dart';
+import 'features/home/domain/repos/home_repo.dart';
+import 'features/home/domain/use_cases/check_in_use_case.dart';
+import 'features/home/domain/use_cases/get_today_session_use_case.dart';
+import 'features/home/presentation/manager/home_cubit/home_cubit.dart';
 import 'features/profile/presentation/cubit/profile_cubit.dart';
 
 void main() {
@@ -29,7 +29,7 @@ void main() {
   final ExpenseRepository expenseRepository = ExpenseRepositoryImpl(
     ExpenseLocalDataSource(),
   );
-  final HomeRepository homeRepository = HomeRepositoryImpl(
+  final HomeRepo homeRepo = HomeRepoImp(
     HomeLocalDataSource(),
   );
 
@@ -45,8 +45,8 @@ void main() {
   );
 
   final homeCubit = HomeCubit(
-    getTodaySession: GetTodaySession(homeRepository),
-    checkIn: CheckIn(homeRepository),
+    getTodaySession: GetTodaySessionUseCase(homeRepo),
+    checkIn: CheckInUseCase(homeRepo),
   );
 
   final profileCubit = ProfileCubit();

@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-import '../../domain/entities/attendance_session.dart';
+part of 'home_cubit.dart';
 
 sealed class HomeState extends Equatable {
   const HomeState();
@@ -20,8 +18,8 @@ class HomeLoading extends HomeState {
   List<Object?> get props => [];
 }
 
-class HomeLoaded extends HomeState {
-  const HomeLoaded({
+class HomeSuccess extends HomeState {
+  const HomeSuccess({
     required this.session,
     required this.currentTime,
     required this.progress,
@@ -49,8 +47,8 @@ class HomeLoaded extends HomeState {
       ];
 }
 
-class HomeError extends HomeState {
-  const HomeError(this.message);
+class HomeFailure extends HomeState {
+  const HomeFailure(this.message);
 
   final String message;
 
