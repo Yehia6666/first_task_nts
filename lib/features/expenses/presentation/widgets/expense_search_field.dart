@@ -24,6 +24,7 @@ class ExpenseSearchField extends StatelessWidget {
       onChanged: onChanged,
       background: AppColors.surface,
       radius: AppRadius.xl,
+      prefixIcon: Icons.search_off_rounded,
       height: 48,
       showShadow: true,
       iconSize: 20,

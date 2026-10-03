@@ -19,6 +19,7 @@ class AttendanceSearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppSearchField(
       controller: controller,
+      prefixIcon: Icons.search_off_rounded,
       hintText: 'Search for attendance history',
       onChanged: onChanged,
     );

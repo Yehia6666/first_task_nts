@@ -14,23 +14,29 @@ import '../theme/app_text_styles.dart';
 class AppSearchField extends StatelessWidget {
   const AppSearchField({
     super.key,
-    required this.controller,
     required this.hintText,
+    this.controller,
     this.onChanged,
+    this.onSubmit,
     this.background = AppColors.surface,
     this.radius = AppRadius.xl,
     this.height = 48,
     this.showShadow = true,
-    this.borderColor,
+    this.borderColor = AppColors.textMuted,
     this.iconSize = 20,
     this.iconColor = AppColors.textMuted,
     this.hintStyle,
+    this.prefixIcon,
+    this.validator,
     this.horizontalPadding = AppSpacing.lg,
+    this.suffixIcon,
+    this.isObsecure = false ,
   });
 
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String hintText;
-  final ValueChanged<String>? onChanged;
+  final Function(String)? onChanged;
+  final Function(String)? onSubmit;
   final Color background;
   final double radius;
   final double height;
@@ -40,34 +46,67 @@ class AppSearchField extends StatelessWidget {
   final Color iconColor;
   final TextStyle? hintStyle;
   final double horizontalPadding;
+  final IconData? prefixIcon;
+  final FormFieldValidator<String>? validator;
+  final IconButton? suffixIcon;
+  final bool? isObsecure ;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: background,
         borderRadius: BorderRadius.circular(radius),
-        border: borderColor == null ? null : Border.all(color: borderColor!),
+        // border: borderColor == null ? null : Border.all(color: borderColor!),
         boxShadow: showShadow ? AppShadows.subtle : null,
       ),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        textAlignVertical: TextAlignVertical.center,
-        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: hintStyle ??
-              AppTextStyles.bodyMedium.copyWith(color: AppColors.textMuted),
-          prefixIcon: Icon(Icons.search_rounded, size: iconSize, color: iconColor),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: AppSpacing.md,
+      child: SizedBox(
+        height: height,
+        child: TextFormField(
+          controller: controller,
+          onChanged: onChanged,
+          onFieldSubmitted: onSubmit,
+          validator: validator,
+          obscureText: isObsecure!,
+          textAlignVertical: TextAlignVertical.center,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textPrimary,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle:
+                hintStyle ??
+                AppTextStyles.bodyMedium.copyWith(color: AppColors.textMuted),
+            prefixIcon: Icon(
+              prefixIcon ?? Icons.search,
+              size: iconSize,
+              color: iconColor,
+            ),
+            suffixIcon: suffixIcon,
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 48,
+              minHeight: 48,
+            ),
+            filled: true,
+            fillColor: background,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 20,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(radius),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(radius),
+              borderSide: borderColor == null
+                  ? BorderSide.none
+                  : BorderSide(color: borderColor!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(radius),
+              borderSide: BorderSide(color: borderColor ?? AppColors.primary),
+            ),
           ),
         ),
       ),

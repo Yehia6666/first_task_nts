@@ -17,6 +17,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.expanded = true,
     this.height = 48,
+    this.backgroundColor = AppColors.primary,
   });
 
   final String label;
@@ -25,6 +26,7 @@ class AppButton extends StatelessWidget {
   final IconData? icon;
   final bool expanded;
   final double height;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -50,45 +52,45 @@ class AppButton extends StatelessWidget {
       height: height,
       child: switch (variant) {
         AppButtonVariant.primary => FilledButton(
-            onPressed: onPressed,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-              disabledBackgroundColor: AppColors.surfaceVariant,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: backgroundColor,
+            foregroundColor: AppColors.onPrimary,
+            disabledBackgroundColor: AppColors.surfaceVariant,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.card),
             ),
-            child: content,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
           ),
+          child: content,
+        ),
         AppButtonVariant.secondary => OutlinedButton(
-            onPressed: onPressed,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textPrimary,
-              side: const BorderSide(color: AppColors.border),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.textPrimary,
+            side: const BorderSide(color: AppColors.border),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: content,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
           ),
+          child: content,
+        ),
         AppButtonVariant.text => TextButton(
-            onPressed: onPressed,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-            ),
-            child: content,
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
           ),
+          child: content,
+        ),
       },
     );
   }
 
   Color get _foreground => switch (variant) {
-        AppButtonVariant.primary => AppColors.onPrimary,
-        AppButtonVariant.secondary => AppColors.textPrimary,
-        AppButtonVariant.text => AppColors.primary,
-      };
+    AppButtonVariant.primary => AppColors.onPrimary,
+    AppButtonVariant.secondary => AppColors.textPrimary,
+    AppButtonVariant.text => AppColors.primary,
+  };
 }

@@ -1,3 +1,5 @@
+import 'package:first_task_nts/features/auth/presentation/screens/login_screen.dart';
+import 'package:first_task_nts/features/auth/presentation/screens/server_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,7 +14,9 @@ import '../widgets/app_placeholder_screen.dart';
 import '../widgets/app_shell.dart';
 
 abstract class AppRouter {
-  static const String home = '/';
+  static const String login = '/';
+  static const String server = '/server';
+  static const String home = '/home';
   static const String timeOff = '/time-off';
   static const String payroll = '/payroll';
   static const String expense = '/expense';
@@ -22,8 +26,18 @@ abstract class AppRouter {
   static const String expenseDetails = '/expense-details';
 
   static final GoRouter router = GoRouter(
-    initialLocation: home,
+    initialLocation: server,
     routes: [
+      GoRoute(
+        path: login,
+        name: 'login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: server,
+        name: 'server',
+        builder: (context, state) => const ServerScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),

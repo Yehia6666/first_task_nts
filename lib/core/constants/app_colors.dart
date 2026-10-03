@@ -34,6 +34,6 @@ abstract final class AppColors {
 
   static const Color accentViolet = Color(0xFF8B5CF6);
   static const Color accentVioletContainer = Color(0xFFF2ECFE);
-
+  static const Color mainPrimaryColor = Color(0xFF08777D);
   static const Color shadow = Color(0xFF1A1D2E);
 }
