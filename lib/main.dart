@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:first_task_nts/core/theme/app_theme.dart';
 import 'package:first_task_nts/core/utils/app_router.dart';
 import 'package:first_task_nts/features/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:first_task_nts/features/auth/presentation/cubit/login/login_cubit.dart';
+import 'package:first_task_nts/features/auth/presentation/cubit/server/server_cubit.dart';
 import 'package:first_task_nts/features/expenses/presentation/cubit/expenses_cubit.dart';
 import 'package:first_task_nts/features/home/presentation/manager/home_cubit/home_cubit.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
@@ -26,6 +28,8 @@ class _NtsAppState extends State<NtsApp> {
   late final ExpensesCubit _expensesCubit;
   late final HomeCubit _homeCubit;
   late final ProfileCubit _profileCubit;
+  late final ServerCubit _serverCubit;
+  late final LoginCubit _loginCubit;
 
   @override
   void initState() {
@@ -34,6 +38,8 @@ class _NtsAppState extends State<NtsApp> {
     _expensesCubit = getIt<ExpensesCubit>();
     _homeCubit = getIt<HomeCubit>();
     _profileCubit = getIt<ProfileCubit>();
+    _serverCubit = getIt<ServerCubit>();
+    _loginCubit = getIt<LoginCubit>();
   }
 
   @override
@@ -42,6 +48,8 @@ class _NtsAppState extends State<NtsApp> {
     _expensesCubit.close();
     _homeCubit.close();
     _profileCubit.close();
+    _serverCubit.close();
+    _loginCubit.close();
     super.dispose();
   }
 
@@ -53,6 +61,8 @@ class _NtsAppState extends State<NtsApp> {
         BlocProvider.value(value: _expensesCubit),
         BlocProvider.value(value: _homeCubit),
         BlocProvider.value(value: _profileCubit),
+        BlocProvider.value(value: _serverCubit),
+        BlocProvider.value(value: _loginCubit),
       ],
       child: MaterialApp.router(
         title: 'NTS App',

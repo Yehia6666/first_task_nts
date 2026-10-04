@@ -91,7 +91,7 @@ class AppSearchField extends StatelessWidget {
             fillColor: background,
             contentPadding: EdgeInsets.symmetric(
               horizontal: horizontalPadding,
-              vertical: 20,
+              vertical: 8,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(radius),

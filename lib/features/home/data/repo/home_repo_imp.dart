@@ -18,8 +18,8 @@ class HomeRepoImp implements HomeRepo {
       final model = await _dataSource.getTodaySession();
       return Right(model.toEntity());
     } catch (_) {
-      return const Left(
-        CacheFailure('We could not load your session. Please try again.'),
+      return Left(
+        ServerFaliure('We could not load your session. Please try again.'),
       );
     }
   }
@@ -30,8 +30,8 @@ class HomeRepoImp implements HomeRepo {
       final model = await _dataSource.checkIn(now);
       return Right(model.toEntity());
     } catch (_) {
-      return const Left(
-        CacheFailure('We could not check you in. Please try again.'),
+      return Left(
+        ServerFaliure('We could not check you in. Please try again.'),
       );
     }
   }

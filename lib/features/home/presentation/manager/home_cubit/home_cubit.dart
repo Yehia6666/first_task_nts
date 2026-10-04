@@ -32,7 +32,7 @@ class HomeCubit extends Cubit<HomeState> {
     emit(const HomeLoading());
     final result = await getTodaySession(const NoParams());
     result.fold(
-      (failure) => emit(HomeFailure(failure.message)),
+      (failure) => emit(HomeFailure(failure.errorMessage)),
       (session) {
         _session = session;
         _startClock();
@@ -77,7 +77,7 @@ class HomeCubit extends Cubit<HomeState> {
       (failure) {
         _isCheckingIn = false;
         _emitLoaded();
-        emit(HomeFailure(failure.message));
+        emit(HomeFailure(failure.errorMessage));
       },
       (updatedSession) {
         _session = updatedSession;
