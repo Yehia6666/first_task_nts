@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'dart:io';
 import '../../../../core/utils/api_service.dart';
 import '../models/server_model/database_validation_model.dart';
