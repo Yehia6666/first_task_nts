@@ -1,5 +1,6 @@
 import 'package:first_task_nts/core/constants/app_colors.dart';
 import 'package:first_task_nts/core/theme/app_text_styles.dart';
+import 'package:first_task_nts/core/widgets/app_logo.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:flutter/material.dart';
 
@@ -29,22 +30,10 @@ class ProfileFrontCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(state.company, style: AppTextStyles.bodyMedium),
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(24 * 0.3),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'N',
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: AppColors.onPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+               AppLogo(
+                width: 30,
+                height: 30,
+               ),
               ],
             ),
             const SizedBox(height: 8),
