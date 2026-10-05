@@ -1,3 +1,4 @@
+import 'package:first_task_nts/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
@@ -70,7 +71,16 @@ class AppDrawer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AppLogo(wordmark: 'HitekNOFAL', size: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const AppLogo( height: 36 , width: 36,),
+                  SizedBox(
+                    width: 8,
+                  ),
+                  Text('Massary',style: AppTextStyles.headline,)
+                ],
+              ),
               const SizedBox(height: AppSpacing.lg),
               const Divider(height: 1, thickness: 1, color: AppColors.border),
               const SizedBox(height: AppSpacing.sm),

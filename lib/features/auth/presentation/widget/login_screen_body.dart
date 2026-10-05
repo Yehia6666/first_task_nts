@@ -1,5 +1,6 @@
 import 'package:first_task_nts/core/constants/app_colors.dart';
 import 'package:first_task_nts/core/theme/app_text_styles.dart';
+import 'package:first_task_nts/core/widgets/app_logo.dart';
 import 'package:first_task_nts/features/auth/presentation/widget/login_container.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,7 @@ class LoginScreenBody extends StatelessWidget {
     return ListView(
       children: [
         SizedBox(height: 70),
-        Image.asset('assets/images/home/logo.jpeg', height: 80, width: 80),
+        AppLogo(),
         LoginContainer(),
         InkWell(
           onTap: () {},

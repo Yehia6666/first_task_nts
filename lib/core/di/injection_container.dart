@@ -24,80 +24,95 @@ import 'package:first_task_nts/features/home/domain/repos/home_repo.dart';
 import 'package:first_task_nts/features/home/domain/use_cases/check_in_use_case.dart';
 import 'package:first_task_nts/features/home/domain/use_cases/get_today_session_use_case.dart';
 import 'package:first_task_nts/features/home/presentation/manager/home_cubit/home_cubit.dart';
+import 'package:first_task_nts/features/payroll/data/datasources/payroll_remote_data_source.dart';
+import 'package:first_task_nts/features/payroll/data/datasources/payroll_remote_data_source_impl.dart';
+import 'package:first_task_nts/features/payroll/data/repositories/payroll_repository_imp.dart';
+import 'package:first_task_nts/features/payroll/domain/repository/payroll_repository.dart';
+import 'package:first_task_nts/features/payroll/domain/usecases/get_payslip.dart';
+import 'package:first_task_nts/features/payroll/domain/usecases/get_payslip_lines.dart';
+import 'package:first_task_nts/features/payroll/domain/usecases/get_payslip_pdf.dart';
+import 'package:first_task_nts/features/payroll/domain/usecases/get_payslip_worked_days.dart';
+import 'package:first_task_nts/features/payroll/domain/usecases/get_payslips.dart';
+import 'package:first_task_nts/features/payroll/domain/usecases/get_salary_attachment.dart';
+import 'package:first_task_nts/features/payroll/domain/usecases/get_salary_attachments.dart';
+import 'package:first_task_nts/features/payroll/presentation/cubit/payroll_cubit.dart';
+import 'package:first_task_nts/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:first_task_nts/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:first_task_nts/features/profile/domain/repository/profile_repository.dart';
+import 'package:first_task_nts/features/profile/domain/usecases/get_profile_use_case.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:first_task_nts/core/utils/api_service.dart';
+import 'package:first_task_nts/core/utils/token_store.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Global service locator for the app.
 final GetIt getIt = GetIt.instance;
-
-/// Registers all data sources, repositories, use cases and cubits.
-///
-/// Lifetimes:
-/// - Data sources and repositories: lazy singletons (stateless, one instance
-///   for the app lifetime).
-/// - Use cases: factories (stateless, cheap to create).
-/// - Cubits: lazy singletons (stateful, one instance shared across the app).
 Future<void> setupServiceLocator() async {
-  // ── Data sources ──────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AttendanceLocalDataSource>(
     () => AttendanceLocalDataSource(),
   );
   getIt.registerLazySingleton<ExpenseLocalDataSource>(
     () => ExpenseLocalDataSource(),
   );
-  getIt.registerLazySingleton<HomeLocalDataSource>(
-    () => HomeLocalDataSource(),
-  );
+  getIt.registerLazySingleton<HomeLocalDataSource>(() => HomeLocalDataSource());
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImp(getIt()),
+    () => AuthRemoteDataSourceImp(getIt(), getIt()),
   );
 
-  // ── Repositories ──────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AttendanceRepository>(
     () => AttendanceRepositoryImpl(getIt()),
   );
   getIt.registerLazySingleton<ExpenseRepository>(
     () => ExpenseRepositoryImpl(getIt()),
   );
-  getIt.registerLazySingleton<HomeRepo>(
-    () => HomeRepoImp(getIt()),
+  getIt.registerLazySingleton<HomeRepo>(() => HomeRepoImp(getIt()));
+  getIt.registerLazySingleton<AuthRepository>(() => AuthRepositoryImp(getIt()));
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImp(getIt(), getIt()),
   );
-  getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImp(getIt()),
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImp(getIt()),
+  );
+  getIt.registerLazySingleton<PayrollRemoteDataSource>(
+    () => PayrollRemoteDataSourceImp(getIt(), getIt()),
+  );
+  getIt.registerLazySingleton<PayrollRepository>(
+    () => PayrollRepositoryImp(getIt()),
   );
 
-  // ── Use cases ─────────────────────────────────────────────────────────────
-  getIt.registerFactory<GetAttendanceLogs>(
-    () => GetAttendanceLogs(getIt()),
-  );
-  getIt.registerFactory<FilterAttendanceLogs>(
-    () => FilterAttendanceLogs(),
-  );
-  getIt.registerFactory<GetExpenses>(
-    () => GetExpenses(getIt()),
-  );
-  getIt.registerFactory<FilterExpenses>(
-    () => FilterExpenses(),
-  );
-  getIt.registerFactory<SummarizeExpenses>(
-    () => SummarizeExpenses(),
-  );
+  getIt.registerFactory<GetAttendanceLogs>(() => GetAttendanceLogs(getIt()));
+  getIt.registerFactory<FilterAttendanceLogs>(() => FilterAttendanceLogs());
+  getIt.registerFactory<GetExpenses>(() => GetExpenses(getIt()));
+  getIt.registerFactory<FilterExpenses>(() => FilterExpenses());
+  getIt.registerFactory<SummarizeExpenses>(() => SummarizeExpenses());
   getIt.registerFactory<GetTodaySessionUseCase>(
     () => GetTodaySessionUseCase(getIt()),
   );
-  getIt.registerFactory<CheckInUseCase>(
-    () => CheckInUseCase(getIt()),
-  );
+  getIt.registerFactory<CheckInUseCase>(() => CheckInUseCase(getIt()));
   getIt.registerFactory<ValidateDatabaseUseCase>(
     () => ValidateDatabaseUseCase(getIt()),
   );
-  getIt.registerFactory<SignInUseCase>(
-    () => SignInUseCase(getIt()),
+  getIt.registerFactory<SignInUseCase>(() => SignInUseCase(getIt()));
+  getIt.registerFactory<GetProfileUseCase>(() => GetProfileUseCase(getIt()));
+  getIt.registerFactory<GetPayslipsUseCase>(() => GetPayslipsUseCase(getIt()));
+  getIt.registerFactory<GetPayslipUseCase>(() => GetPayslipUseCase(getIt()));
+  getIt.registerFactory<GetPayslipWorkedDaysUseCase>(
+    () => GetPayslipWorkedDaysUseCase(getIt()),
+  );
+  getIt.registerFactory<GetPayslipLinesUseCase>(
+    () => GetPayslipLinesUseCase(getIt()),
+  );
+  getIt.registerFactory<GetPayslipPdfUseCase>(
+    () => GetPayslipPdfUseCase(getIt()),
+  );
+  getIt.registerFactory<GetSalaryAttachmentsUseCase>(
+    () => GetSalaryAttachmentsUseCase(getIt()),
+  );
+  getIt.registerFactory<GetSalaryAttachmentUseCase>(
+    () => GetSalaryAttachmentUseCase(getIt()),
   );
 
-  // ── Cubits ────────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<AttendanceCubit>(
     () => AttendanceCubit(
       getAttendanceLogs: getIt(),
@@ -112,13 +127,13 @@ Future<void> setupServiceLocator() async {
     ),
   );
   getIt.registerLazySingleton<HomeCubit>(
-    () => HomeCubit(
-      getTodaySession: getIt(),
-      checkIn: getIt(),
-    ),
+    () => HomeCubit(getTodaySession: getIt(), checkIn: getIt()),
   );
   getIt.registerLazySingleton<ProfileCubit>(
-    () => ProfileCubit(),
+    () => ProfileCubit(getProfile: getIt(), tokenStore: getIt()),
+  );
+  getIt.registerLazySingleton<PayrollCubit>(
+    () => PayrollCubit(getPayslips: getIt(), tokenStore: getIt()),
   );
   getIt.registerLazySingleton<ServerCubit>(
     () => ServerCubit(validateDatabaseUseCase: getIt()),
@@ -127,15 +142,13 @@ Future<void> setupServiceLocator() async {
     () => LoginCubit(signInUseCase: getIt()),
   );
 
-  // ── Core ──────────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<Dio>(() => Dio());
-  getIt.registerLazySingleton<ApiService>(
-    () => ApiService(getIt()),
-  );
+  getIt.registerLazySingleton<ApiService>(() => ApiService(getIt()));
+  final preferences = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(preferences);
+  getIt.registerLazySingleton<TokenStore>(() => TokenStore(getIt()));
 }
 
-/// Resets the service locator. Useful in tests to re-register fresh
-/// instances or swap in mocks.
 Future<void> resetServiceLocator() async {
   await getIt.reset();
 }

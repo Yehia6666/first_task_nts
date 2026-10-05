@@ -21,6 +21,8 @@ class AuthRepositoryImp implements AuthRepository {
       return Right(model);
     } on DioException catch (e) {
       return Left(ServerFaliure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFaliure(e.toString()));
     }
   }
 
@@ -37,6 +39,8 @@ class AuthRepositoryImp implements AuthRepository {
       return Right(model);
     } on DioException catch (e) {
       return Left(ServerFaliure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFaliure(e.toString()));
     }
   }
 }

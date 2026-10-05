@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -17,6 +19,7 @@ class LoginCubit extends Cubit<LoginState> {
   }) async {
     emit(LoginLoading());
     final result = await signInUseCase.call((email, password));
+    log('LoginCubit');
     result.fold(
       (failure) => emit(LoginFailure(failure.errorMessage)),
       (response) {

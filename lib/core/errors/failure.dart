@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
 abstract class Failure {
@@ -20,13 +22,13 @@ class ServerFaliure extends Failure {
       case DioExceptionType.badCertificate:
         return ServerFaliure('badCertificate with APiServer');
       case DioExceptionType.badResponse:
-        print('=== DIO DEBUG ===');
-        print('URI: ${e.requestOptions.uri}');
-        print('Method: ${e.requestOptions.method}');
-        print('Status: ${e.response?.statusCode}');
-        print('Response data: ${e.response?.data}');
-        print('Response data type: ${e.response?.data.runtimeType}');
-        print('=== END DIO DEBUG ===');
+        log('=== DIO DEBUG ===');
+        log('URI: ${e.requestOptions.uri}');
+        log('Method: ${e.requestOptions.method}');
+        log('Status: ${e.response?.statusCode}');
+        log('Response data: ${e.response?.data}');
+        log('Response data type: ${e.response?.data.runtimeType}');
+        log('=== END DIO DEBUG ===');
         return ServerFaliure.fromResponse(
           e.response!.statusCode!,
           e.response!.data,

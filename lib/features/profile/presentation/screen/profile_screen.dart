@@ -1,5 +1,8 @@
+import 'package:first_task_nts/core/di/injection_container.dart';
 import 'package:first_task_nts/core/shimmer/shimmer_profile.dart';
 import 'package:first_task_nts/core/theme/app_text_styles.dart';
+import 'package:first_task_nts/core/utils/token_store.dart';
+import 'package:first_task_nts/features/profile/domain/usecases/get_profile_use_case.dart';
 import 'package:first_task_nts/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:first_task_nts/features/profile/presentation/widgets/profile_screen_body.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +15,10 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProfileCubit>(
-      create: (context) => ProfileCubit()..loadProfile(),
+      create: (context) => ProfileCubit(
+        getProfile: getIt<GetProfileUseCase>(),
+        tokenStore: getIt<TokenStore>(),
+      )..load(),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -26,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
         body: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
             if (state is ProfileSuccess) {
-              return ProfileScreenBody();
+              return ProfileScreenBody(state: state);
             } else if (state is ProfileFailure) {
               return Text(state.error);
             } else {

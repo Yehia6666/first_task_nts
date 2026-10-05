@@ -32,7 +32,7 @@ class HomeHeader extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const AppLogo(),
+          const AppLogo(height: 28 ,width: 28,),
           const Spacer(),
           const HomeNotificationBell(),
           const SizedBox(width: AppSpacing.sm),

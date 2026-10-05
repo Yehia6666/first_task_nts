@@ -8,6 +8,7 @@ import '../../features/expenses/domain/entities/expense.dart';
 import '../../features/expenses/presentation/screens/expense_details_screen.dart';
 import '../../features/expenses/presentation/screens/expenses_screen.dart';
 import '../../features/home/presentation/view/home_screen.dart';
+import '../../features/payroll/presentation/screens/payroll_screen.dart';
 import '../../features/profile/presentation/screen/profile_screen.dart';
 import '../../features/time_off/presentation/screen/time_off_screen.dart';
 import '../widgets/app_placeholder_screen.dart';
@@ -65,11 +66,7 @@ abstract class AppRouter {
               GoRoute(
                 path: payroll,
                 name: 'payroll',
-                builder: (context, state) => const PlaceholderScreen(
-                  title: 'Payroll',
-                  icon: Icons.account_balance_wallet_outlined,
-                  message: 'Payroll details will live here.',
-                ),
+                builder: (context, state) => const PayrollScreen(),
               ),
             ],
           ),

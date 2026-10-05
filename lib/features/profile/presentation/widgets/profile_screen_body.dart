@@ -5,51 +5,45 @@ import 'package:first_task_nts/features/profile/presentation/widgets/profile_fro
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Body of the profile screen: the flippable profile card plus contact info,
-/// driven by [ProfileCubit].
+/// Body of the profile screen: the flippable profile card plus contact info.
+///
+/// Receives the already-resolved [ProfileSuccess] state from `ProfileScreen`,
+/// which owns the only [ProfileCubit] listener for this route. A second
+/// BlocBuilder on the same cubit is therefore unnecessary: the screen rebuilds
+/// this widget for every state change, including the card flip.
 class ProfileScreenBody extends StatelessWidget {
-  const ProfileScreenBody({super.key});
+  const ProfileScreenBody({super.key, required this.state});
+
+  final ProfileSuccess state;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileCubit, ProfileState>(
-      buildWhen: (previous, current) {
-        if (previous is ProfileSuccess && current is ProfileSuccess) {
-          return previous.isCardFlipped != current.isCardFlipped;
-        }
-        return false;
-      },
-      builder: (context, state) {
-        if (state is! ProfileSuccess) return const SizedBox.shrink();
+    final screenHeight = MediaQuery.of(context).size.height;
 
-        final screenHeight = MediaQuery.of(context).size.height;
-
-        return ListView(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              color: Colors.grey[100],
-              height: screenHeight * 0.5,
-              child: GestureDetector(
-                onTap: () => context.read<ProfileCubit>().toggleCardFlip(),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  transitionBuilder: (child, animation) {
-                    return ScaleTransition(scale: animation, child: child);
-                  },
-                  child: state.isCardFlipped
-                      ? ProfileBackCard(state: state)
-                      : ProfileFrontCard(state: state),
-                ),
-              ),
+    return ListView(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+          color: Colors.grey[100],
+          height: screenHeight * 0.5,
+          child: GestureDetector(
+            onTap: () => context.read<ProfileCubit>().toggleCardFlip(),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: state.isCardFlipped
+                  ? ProfileBackCard(state: state)
+                  : ProfileFrontCard(state: state),
             ),
-            ContactInfo(
-              email: state.email,
-              phone: state.phone,
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+        ContactInfo(
+          email: state.email,
+          phone: state.phone,
+        ),
+      ],
     );
   }
 }

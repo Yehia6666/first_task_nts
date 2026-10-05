@@ -41,7 +41,7 @@ class _DatabaseContainerState extends State<DatabaseContainer> {
     return BlocListener<ServerCubit, ServerState>(
       listener: (context, state) {
         if (state is ServerSuccess) {
-                    log('error message is : ${state.validation.message}');
+                    log('Success message is : ${state.validation.message}');
 
           context.pushReplacement(AppRouter.login);
         } else if (state is ServerFailure) {

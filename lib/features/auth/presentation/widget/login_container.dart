@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:first_task_nts/features/auth/presentation/cubit/login/login_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,9 +36,9 @@ class _LoginContainerState extends State<LoginContainer> {
   void _continue(BuildContext context) {
     if (_formKey.currentState!.validate()) {
       context.read<LoginCubit>().signIn(
-            email: emailController.text,
-            password: passwordController.text,
-          );
+        email: emailController.text,
+        password: passwordController.text,
+      );
     }
   }
 
@@ -45,10 +47,17 @@ class _LoginContainerState extends State<LoginContainer> {
     return BlocListener<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state is LoginSuccess) {
+          log('success messsage is :${state.response.message}');
           context.pushReplacement(AppRouter.home);
         } else if (state is LoginFailure) {
+          log('error messsage is :${state.errorMessage}');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage)),
+            SnackBar(
+              content: Text(
+                state.errorMessage,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           );
         }
       },
@@ -58,7 +67,10 @@ class _LoginContainerState extends State<LoginContainer> {
           return Form(
             key: _formKey,
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: AppRadius.card, vertical: 44),
+              margin: EdgeInsets.symmetric(
+                horizontal: AppRadius.card,
+                vertical: 44,
+              ),
               padding: EdgeInsets.symmetric(
                 horizontal: AppRadius.lg,
                 vertical: AppRadius.card,
@@ -115,7 +127,10 @@ class _LoginContainerState extends State<LoginContainer> {
                       },
                       icon: isObsecure == true
                           ? Icon(Icons.visibility, color: AppColors.textMuted)
-                          : Icon(Icons.visibility_off, color: AppColors.textMuted),
+                          : Icon(
+                              Icons.visibility_off,
+                              color: AppColors.textMuted,
+                            ),
                     ),
                     hintText: 'Password',
                     prefixIcon: Icons.lock_outline,
@@ -129,6 +144,7 @@ class _LoginContainerState extends State<LoginContainer> {
                       : AppButton(
                           label: 'Login',
                           onPressed: () {
+                            log('login button');
                             _continue(context);
                           },
                           icon: Icons.lock_outline,
